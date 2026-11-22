@@ -115,6 +115,7 @@ footer.site .social-row{margin-top:0}
 <body>
 <div class="wrap">
   <div id="ticker" class="ticker-wrap"></div>
+  <div id="errbanner"></div>
   <div class="topbar">
     <div class="logo"><span class="mark">📖</span>کتێبخانە</div>
     <div class="nav" id="nav">
@@ -166,7 +167,7 @@ async function loadAll(){
   ]);
   const errs = results.map(r=>r.error).filter(Boolean);
   if(errs.length){
-    document.getElementById('app').innerHTML = '<div class="empty" style="color:#ff8a8a">هەڵەی بارکردنی داتا: '+esc(errs[0].message)+'</div>';
+    document.getElementById('errbanner').innerHTML = '<div style="background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.35);color:#ffb3b3;font-size:12px;padding:8px 14px;border-radius:10px;margin-bottom:12px">هەڵەی بارکردنی داتا: '+esc(errs[0].message)+'</div>';
   }
   const [{data:cats}, {data:books}, {data:posts}, {data:admins}, {data:settings}, {data:messages}] = results;
   DATA.cats = cats||[]; DATA.books = books||[]; DATA.posts = posts||[];
