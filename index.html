@@ -66,14 +66,16 @@ a{color:inherit;text-decoration:none}
 .nav a{font-size:13px;color:var(--txt2);padding:7px 14px;border-radius:10px;white-space:nowrap;transition:background .15s,color .15s}
 .nav a.active{backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.35);color:var(--txt)}
 .ticker-wrap{display:flex;align-items:center;gap:10px;overflow:hidden;backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);background:linear-gradient(160deg,rgba(255,185,90,.22),rgba(255,185,90,.08));border:1px solid rgba(255,185,90,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 6px 18px rgba(255,160,70,.12);border-radius:12px;padding:6px 14px 6px 6px;margin-bottom:16px;color:#ffdca8;font-size:12.5px}
+html[data-theme="light"] .ticker-wrap{color:#7a4a08;background:linear-gradient(160deg,rgba(255,185,90,.3),rgba(255,185,90,.12))}
 .ticker-wrap:empty{display:none}
 .ticker-badge{flex-shrink:0;display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,#ffb95a,#ff8c3c);color:#1b1206;font-weight:700;font-size:11px;padding:6px 12px;border-radius:9px;box-shadow:0 2px 8px rgba(255,160,70,.45)}
 .ticker-badge .dot{width:6px;height:6px;border-radius:50%;background:#1b1206;animation:tickerPulse 1.4s ease-in-out infinite}
 @keyframes tickerPulse{0%,100%{opacity:1}50%{opacity:.25}}
-.ticker-viewport{position:relative;flex:1;min-width:0;overflow:hidden;white-space:nowrap;-webkit-mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent,#000 28px,#000 calc(100% - 28px),transparent)}
-.ticker-track{display:inline-block;padding-right:100%;animation:tick 32s linear infinite}
+.ticker-viewport{position:relative;flex:1;min-width:0;overflow:hidden;white-space:nowrap;direction:ltr;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 24px),transparent)}
+.ticker-track{display:inline-flex;gap:60px;animation:tick 26s linear infinite;will-change:transform}
+.ticker-track span{display:inline-block}
 .ticker-wrap:hover .ticker-track{animation-play-state:paused}
-@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
 .stat{position:relative;overflow:hidden;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 6px 18px rgba(0,0,0,.3);border-radius:12px;padding:10px 6px;text-align:center;transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease}
 .stat:hover{transform:translateY(-4px);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 14px 26px rgba(79,184,232,.2)}
@@ -285,7 +287,8 @@ function renderTicker(){
   const el = document.getElementById('ticker');
   if (!DATA.messages.length){ el.innerHTML=''; return; }
   const text = DATA.messages.map(m => esc(m.body)).join(' &nbsp;&nbsp;&middot;&nbsp;&nbsp; ');
-  el.innerHTML = `<span class="ticker-badge"><span class="dot"></span>ئاگاداری</span><span class="ticker-viewport"><span class="ticker-track">${text}</span></span>`;
+  const seg = `<span dir="rtl">${text}</span>`;
+  el.innerHTML = `<span class="ticker-badge"><span class="dot"></span>ئاگاداری</span><span class="ticker-viewport"><span class="ticker-track">${seg}${seg}</span></span>`;
 }
 
 function route(){ return location.hash.replace('#','') || '/'; }
