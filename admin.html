@@ -574,7 +574,7 @@ async function addMsg(){
   if(!body){ document.getElementById('m_msg').innerHTML='<div class="msg err">دەق پێویستە</div>'; return; }
   const dur = document.getElementById('m_dur').value;
   let expires_at = null;
-  const now = new Date();
+  const now = new Date(); 
   if(dur==='today'){ const d=new Date(now); d.setHours(23,59,59,999); expires_at = d.toISOString(); }
   else if(dur==='week'){ const d=new Date(now); d.setDate(d.getDate()+7); expires_at = d.toISOString(); }
   const { error } = await sb.from('messages').insert({ body, expires_at });
