@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>پانێلی ئادمین - کتێبخانە</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg1:#141925; --bg2:#0a0c12;
+  --glass:rgba(255,255,255,.1); --glass-2:rgba(255,255,255,.16);
+  --gborder:rgba(255,255,255,.22); --gborder-2:rgba(255,255,255,.32);
+  --txt:#fff; --txt2:rgba(255,255,255,.62); --txt3:rgba(255,255,255,.42);
+  --blue:#5b8cff; --purple:#8a6cff; --gold:#ffb95a; --red:#ff6b6b;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:
+    radial-gradient(900px 500px at 15% -10%, rgba(91,140,255,.18), transparent 60%),
+    radial-gradient(800px 500px at 110% 10%, rgba(138,108,255,.15), transparent 60%),
+    linear-gradient(160deg,var(--bg1),var(--bg2));
+  background-attachment:fixed;
+  color:var(--txt);font-family:'Vazirmatn',-apple-system,'Segoe UI',Tahoma,sans-serif;line-height:1.7}
+.wrap{max-width:960px;margin:0 auto;padding:20px 20px 60px}
+a{color:inherit}
+h1{font-size:19px;margin:0}
+h2.section{font-size:16px;font-weight:600;margin:0 0 14px}
+.card{position:relative;overflow:hidden;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 10px 26px rgba(0,0,0,.35);border-radius:14px;padding:18px}
+.card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.14),transparent 50%);pointer-events:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600}
+.logo .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple) 60%,var(--gold));box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 12px rgba(91,140,255,.35);display:flex;align-items:center;justify-content:center;font-size:16px}
+.btn{backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);color:#fff;font-size:13px;padding:9px 16px;border-radius:9px;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,var(--blue),var(--purple));border-color:rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 16px rgba(91,140,255,.35)}
+.btn.danger{background:linear-gradient(135deg,#c0392b,#962d22);border-color:rgba(255,255,255,.3)}
+.btn.sm{padding:5px 10px;font-size:11.5px;border-radius:7px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);color:var(--txt2);font-size:12.5px;padding:8px 15px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:rgba(255,255,255,.4)}
+label{display:block;font-size:12px;color:var(--txt2);margin:10px 0 5px}
+input,textarea,select{width:100%;backdrop-filter:blur(14px);background:var(--glass);border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);border-radius:9px;padding:9px 12px;color:#fff;font-size:13px;font-family:inherit;outline:none}
+textarea{min-height:90px;resize:vertical}
+select option{background:#1c1f2a;color:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.row2{grid-template-columns:1fr}}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.item{position:relative;overflow:hidden;backdrop-filter:blur(18px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.item .t{font-weight:600;font-size:13.5px}
+.item .s{font-size:11.5px;color:var(--txt2)}
+.item .acts{display:flex;gap:6px}
+.msg{font-size:12.5px;padding:8px 12px;border-radius:8px;margin-top:10px}
+.msg.err{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.35);color:#ffb3b3}
+.msg.ok{background:rgba(91,140,255,.15);border:1px solid rgba(91,140,255,.35);color:#bcd0ff}
+#loginScreen{max-width:380px;margin:80px auto}
+.hidden{display:none}
+.avatarprev{width:50px;height:50px;border-radius:50%;object-fit:cover;background:var(--glass);border:1px solid var(--gborder)}
+.empty{color:var(--txt2);font-size:13px;padding:20px 0;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="loginScreen">
+  <div class="card">
+    <div class="logo" style="margin-bottom:16px"><span class="mark">📖</span><h1>چوونەژوورەوەی ئادمین</h1></div>
+    <label>ئیمەیل</label>
+    <input id="loginEmail" type="email" placeholder="admin@example.com">
+    <label>وشەی نهێنی</label>
+    <input id="loginPass" type="password" placeholder="••••••••">
+    <button class="btn primary" style="width:100%;margin-top:16px" onclick="doLogin()">چوونەژوورەوە</button>
+    <div id="loginMsg"></div>
+  </div>
+</div>
+
+<div id="dash" class="hidden">
+  <div class="topbar">
+    <div class="logo"><span class="mark">📖</span><h1>پانێلی ئادمین</h1></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="whoami" style="font-size:12.5px;color:var(--txt2)"></span>
+      <button class="btn sm" onclick="doLogout()">چوونەدەرەوە</button>
+      <a href="index.html" class="btn sm">بینینی سایت</a>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab" data-tab="books">کتێبەکان</div>
+    <div class="tab" data-tab="article">وتار</div>
+    <div class="tab" data-tab="seminar">سیمینار</div>
+    <div class="tab" data-tab="activity">چالاکی</div>
+    <div class="tab" data-tab="profile">پڕۆفایلم</div>
+    <div class="tab" data-tab="settings">ڕێکخستنەکان</div>
+    <div class="tab" data-tab="ticker">ئاگادارکردنەوە</div>
+  </div>
+
+  <div id="panel"></div>
+</div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://viynxaoruqktjgakgygv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_CAGeHeQS8MLUAur6pKCXcg_i1MREtnL';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let ME = null; // {id, name, ...}
+let CATS = [];
+let activeTab = 'books';
+
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const msgEl = document.getElementById('loginMsg');
+  msgEl.innerHTML = '';
+  if(!email || !pass){ msgEl.innerHTML = '<div class="msg err">ئیمەیل و وشەی نهێنی پڕبکەرەوە</div>'; return; }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if(error){ msgEl.innerHTML = '<div class="msg err">هەڵە: ئیمەیل یان وشەی نهێنی هەڵەیە</div>'; return; }
+  await checkAdmin();
+}
+
+async function checkAdmin(){
+  const { data: { user } } = await sb.auth.getUser();
+  if(!user){ return; }
+  const { data: prof } = await sb.from('admin_profiles').select('*').eq('id', user.id).maybeSingle();
+  if(!prof){
+    await sb.auth.signOut();
+    document.getElementById('loginMsg').innerHTML = '<div class="msg err">ئەم هەژمارە ئادمین نیە</div>';
+    return;
+  }
+  ME = prof;
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('dash').classList.remove('hidden');
+  document.getElementById('whoami').textContent = 'بەخێربێیت ' + (ME.name || '');
+  await loadCats();
+  bindTabs();
+  renderTab();
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  location.reload();
+}
+
+async function loadCats(){
+  const { data } = await sb.from('categories').select('*').order('id');
+  CATS = data || [];
+}
+
+function bindTabs(){
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.onclick = ()=>{ activeTab = t.dataset.tab; renderTab(); };
+  });
+}
+
+function markActiveTab(){
+  document.querySelectorAll('.tab').forEach(t=> t.classList.toggle('active', t.dataset.tab===activeTab));
+}
+
+async function renderTab(){
+  markActiveTab();
+  const panel = document.getElementById('panel');
+  panel.innerHTML = '<div class="empty">چاوەڕێبە...</div>';
+  if(activeTab==='books') return renderBooks();
+  if(['article','seminar','activity'].includes(activeTab)) return renderPosts(activeTab);
+  if(activeTab==='profile') return renderProfile();
+  if(activeTab==='settings') return renderSettings();
+  if(activeTab==='ticker') return renderTicker();
+}
+
+/* ---------- BOOKS ---------- */
+async function renderBooks(){
+  const { data: books } = await sb.from('books').select('*').order('created_at',{ascending:false});
+  const catOpts = CATS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    <div class="card">
+      <h2 class="section">زیادکردنی کتێبی نوێ</h2>
+      <label>ناونیشان</label><input id="b_title">
+      <div class="row2">
+        <div><label>نووسەر</label><input id="b_author"></div>
+        <div><label>پۆل</label><select id="b_cat"><option value="">— هیچ —</option>${catOpts}</select></div>
+      </div>
+      <label>لینکی وێنەی بەرگ (URL)</label><input id="b_cover" placeholder="https://...">
+      <label>کورتەی کتێب</label><textarea id="b_summary"></textarea>
+      <button class="btn primary" style="margin-top:12px" onclick="addBook()">زیادکردن</button>
+      <div id="b_msg"></div>
+    </div>
+    <div class="list" id="b_list"></div>
+  `;
+  const list = document.getElementById('b_list');
+  if(!books || !books.length){ list.innerHTML = '<div class="empty">هیچ کتێبێک نیە</div>'; return; }
+  list.innerHTML = books.map(b=>`
+    <div class="item">
+      <div><div class="t">${esc(b.title)}</div><div class="s">${esc(b.author||'')} · 👁 ${b.views||0}</div></div>
+      <div class="acts">
+        <button class="btn sm" onclick="editBook(${b.id})">دەستکاری</button>
+        <button class="btn sm danger" onclick="delRow('books',${b.id})">سڕینەوە</button>
+      </div>
+    </div>
+  `).join('');
+}
+async function addBook(){
+  const title = document.getElementById('b_title').value.trim();
+  if(!title){ document.getElementById('b_msg').innerHTML='<div class="msg err">ناونیشان پێویستە</div>'; return; }
+  const payload = {
+    title, author: document.getElementById('b_author').value.trim()||null,
+    category_id: document.getElementById('b_cat').value || null,
+    cover_url: document.getElementById('b_cover').value.trim()||null,
+    summary: document.getElementById('b_summary').value.trim()||null
+  };
+  const { error } = await sb.from('books').insert(payload);
+  if(error){ document.getElementById('b_msg').innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
+  renderBooks();
+}
+async function editBook(id){
+  const { data: b } = await sb.from('books').select('*').eq('id',id).single();
+  const title = prompt('ناونیشان:', b.title); if(title===null) return;
+  const author = prompt('نووسەر:', b.author||'');
+  const cover = prompt('لینکی وێنە:', b.cover_url||'');
+  const summary = prompt('کورتە:', b.summary||'');
+  await sb.from('books').update({title, author, cover_url:cover, summary}).eq('id',id);
+  renderBooks();
+}
+async function delRow(table,id){
+  if(!confirm('دڵنیایت لە سڕینەوە؟')) return;
+  await sb.from(table).delete().eq('id',id);
+  renderTab();
+}
+
+/* ---------- POSTS (article/seminar/activity) ---------- */
+const typeLabel = {article:'وتار', seminar:'سیمینار', activity:'چالاکی'};
+async function renderPosts(type){
+  const { data: posts } = await sb.from('posts').select('*').eq('type',type).order('created_at',{ascending:false});
+  const panel = document.getElementById('panel');
+  const isSem = type==='seminar';
+  panel.innerHTML = `
+    <div class="card">
+      <h2 class="section">زیادکردنی ${typeLabel[type]}ی نوێ</h2>
+      <label>ناونیشان</label><input id="p_title">
+      ${isSem ? `
+      <div class="row2">
+        <div><label>بەروار</label><input id="p_date" type="date"></div>
+        <div><label>کات</label><input id="p_time" type="time"></div>
+      </div>
+      <label>شوێن</label><input id="p_loc">` : ''}
+      <label>لینکی وێنە (URL)</label><input id="p_cover" placeholder="https://...">
+      <label>ناوەڕۆک</label><textarea id="p_body"></textarea>
+      <button class="btn primary" style="margin-top:12px" onclick="addPost('${type}')">زیادکردن</button>
+      <div id="p_msg"></div>
+    </div>
+    <div class="list" id="p_list"></div>
+  `;
+  const list = document.getElementById('p_list');
+  if(!posts || !posts.length){ list.innerHTML = '<div class="empty">هیچ نیە</div>'; return; }
+  list.innerHTML = posts.map(p=>`
+    <div class="item">
+      <div><div class="t">${esc(p.title)}</div><div class="s">👁 ${p.views||0}${p.event_date?' · '+esc(p.event_date):''}</div></div>
+      <div class="acts">
+        <button class="btn sm" onclick="editPost(${p.id},'${type}')">دەستکاری</button>
+        <button class="btn sm danger" onclick="delRow('posts',${p.id})">سڕینەوە</button>
+      </div>
+    </div>
+  `).join('');
+}
+async function addPost(type){
+  const title = document.getElementById('p_title').value.trim();
+  if(!title){ document.getElementById('p_msg').innerHTML='<div class="msg err">ناونیشان پێویستە</div>'; return; }
+  const payload = {
+    type, title,
+    body: document.getElementById('p_body').value.trim()||null,
+    cover_url: document.getElementById('p_cover').value.trim()||null,
+    admin_id: ME.id
+  };
+  if(type==='seminar'){
+    payload.event_date = document.getElementById('p_date').value || null;
+    payload.event_time = document.getElementById('p_time').value || null;
+    payload.location = document.getElementById('p_loc').value.trim() || null;
+  }
+  const { error } = await sb.from('posts').insert(payload);
+  if(error){ document.getElementById('p_msg').innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
+  renderPosts(type);
+}
+async function editPost(id,type){
+  const { data: p } = await sb.from('posts').select('*').eq('id',id).single();
+  const title = prompt('ناونیشان:', p.title); if(title===null) return;
+  const body = prompt('ناوەڕۆک:', p.body||'');
+  const cover = prompt('لینکی وێنە:', p.cover_url||'');
+  const upd = {title, body, cover_url:cover};
+  if(type==='seminar'){
+    upd.event_date = prompt('بەروار (YYYY-MM-DD):', p.event_date||'') || null;
+    upd.location = prompt('شوێن:', p.location||'') || null;
+  }
+  await sb.from('posts').update(upd).eq('id',id);
+  renderPosts(type);
+}
+
+/* ---------- MY PROFILE ---------- */
+async function renderProfile(){
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    <div class="card">
+      <h2 class="section">پڕۆفایلی من</h2>
+      <label>ناو</label><input id="pr_name" value="${esc(ME.name||'')}">
+      <label>بایۆگرافیا</label><textarea id="pr_bio">${esc(ME.bio||'')}</textarea>
+      <label>لینکی وێنەی پڕۆفایل (URL)</label><input id="pr_photo" value="${esc(ME.photo_url||'')}">
+      <div class="row2">
+        <div><label>فەیسبوک</label><input id="pr_fb" value="${esc(ME.facebook_url||'')}"></div>
+        <div><label>ئینستاگرام</label><input id="pr_ig" value="${esc(ME.instagram_url||'')}"></div>
+      </div>
+      <label>یوتیوب</label><input id="pr_yt" value="${esc(ME.youtube_url||'')}">
+      <button class="btn primary" style="margin-top:12px" onclick="saveProfile()">پاشەکەوتکردن</button>
+      <div id="pr_msg"></div>
+    </div>
+  `;
+}
+async function saveProfile(){
+  const upd = {
+    name: document.getElementById('pr_name').value.trim(),
+    bio: document.getElementById('pr_bio').value.trim()||null,
+    photo_url: document.getElementById('pr_photo').value.trim()||null,
+    facebook_url: document.getElementById('pr_fb').value.trim()||null,
+    instagram_url: document.getElementById('pr_ig').value.trim()||null,
+    youtube_url: document.getElementById('pr_yt').value.trim()||null
+  };
+  const { error } = await sb.from('admin_profiles').update(upd).eq('id', ME.id);
+  const msgEl = document.getElementById('pr_msg');
+  if(error){ msgEl.innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
+  Object.assign(ME, upd);
+  document.getElementById('whoami').textContent = 'بەخێربێیت ' + (ME.name || '');
+  msgEl.innerHTML = '<div class="msg ok">پاشەکەوت کرا ✓</div>';
+}
+
+/* ---------- SITE SETTINGS ---------- */
+async function renderSettings(){
+  const { data: s } = await sb.from('site_settings').select('*').eq('id',1).maybeSingle();
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    <div class="card">
+      <h2 class="section">لینکە سۆشیالەکانی پڕۆژە</h2>
+      <label>فەیسبوک</label><input id="s_fb" value="${esc(s?.facebook_url||'')}">
+      <label>ئینستاگرام</label><input id="s_ig" value="${esc(s?.instagram_url||'')}">
+      <label>یوتیوب</label><input id="s_yt" value="${esc(s?.youtube_url||'')}">
+      <button class="btn primary" style="margin-top:12px" onclick="saveSettings()">پاشەکەوتکردن</button>
+      <div id="s_msg"></div>
+    </div>
+  `;
+}
+async function saveSettings(){
+  const payload = {
+    id: 1,
+    facebook_url: document.getElementById('s_fb').value.trim()||null,
+    instagram_url: document.getElementById('s_ig').value.trim()||null,
+    youtube_url: document.getElementById('s_yt').value.trim()||null
+  };
+  const { error } = await sb.from('site_settings').upsert(payload);
+  const msgEl = document.getElementById('s_msg');
+  if(error){ msgEl.innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
+  msgEl.innerHTML = '<div class="msg ok">پاشەکەوت کرا ✓</div>';
+}
+
+/* ---------- TICKER MESSAGES ---------- */
+async function renderTicker(){
+  const { data: msgs } = await sb.from('messages').select('*').order('created_at',{ascending:false});
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    <div class="card">
+      <h2 class="section">زیادکردنی ئاگادارکردنەوەی نوێ</h2>
+      <label>دەقی ئاگادارکردنەوە</label><textarea id="m_body"></textarea>
+      <label>ماوە</label>
+      <select id="m_dur">
+        <option value="today">تەنها ئەمڕۆ</option>
+        <option value="week">١ هەفتە</option>
+        <option value="forever">تا سڕینەوە</option>
+      </select>
+      <button class="btn primary" style="margin-top:12px" onclick="addMsg()">زیادکردن</button>
+      <div id="m_msg"></div>
+    </div>
+    <div class="list" id="m_list"></div>
+  `;
+  const list = document.getElementById('m_list');
+  if(!msgs || !msgs.length){ list.innerHTML = '<div class="empty">هیچ ئاگادارکردنەوەیەک نیە</div>'; return; }
+  list.innerHTML = msgs.map(m=>`
+    <div class="item">
+      <div><div class="t">${esc(m.body)}</div><div class="s">${m.expires_at ? 'بەسەردەچێت: '+esc(m.expires_at) : 'هەتاهەتایی'}</div></div>
+      <div class="acts"><button class="btn sm danger" onclick="delRow('messages',${m.id})">سڕینەوە</button></div>
+    </div>
+  `).join('');
+}
+async function addMsg(){
+  const body = document.getElementById('m_body').value.trim();
+  if(!body){ document.getElementById('m_msg').innerHTML='<div class="msg err">دەق پێویستە</div>'; return; }
+  const dur = document.getElementById('m_dur').value;
+  let expires_at = null;
+  const now = new Date();
+  if(dur==='today'){ const d=new Date(now); d.setHours(23,59,59,999); expires_at = d.toISOString(); }
+  else if(dur==='week'){ const d=new Date(now); d.setDate(d.getDate()+7); expires_at = d.toISOString(); }
+  const { error } = await sb.from('messages').insert({ body, expires_at });
+  if(error){ document.getElementById('m_msg').innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
+  renderTicker();
+}
+
+/* ---------- INIT ---------- */
+(async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){ await checkAdmin(); }
+})();
+</script>
+</body>
+</html>
