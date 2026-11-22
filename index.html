@@ -158,7 +158,7 @@ function bumpViewOnce(kind, id){
 async function loadAll(){
   const [{data:cats}, {data:books}, {data:posts}, {data:admins}, {data:settings}, {data:messages}] = await Promise.all([
     sb.from('categories').select('*').order('id'),
-    sb.from('books').select('*').order('created_at',{ascending:false}),
+    sb.from('books').select('*, admin_profiles(name)').order('created_at',{ascending:false}),
     sb.from('posts').select('*, admin_profiles(name)').order('created_at',{ascending:false}),
     sb.from('admin_profiles').select('*').order('created_at'),
     sb.from('site_settings').select('*').eq('id',1).maybeSingle(),
@@ -209,7 +209,7 @@ function bookCard(b){
     </div>
     <p class="title">${esc(b.title)}</p>
     <p class="author">${esc(b.author)}</p>
-    <div class="meta-row"><span>👁 ${b.views||0} بینین</span></div>
+    <div class="meta-row"><span>👁 <bdi>${b.views||0}</bdi> بینین</span>${b.admin_profiles?`<span>&middot; زیادکراوە لەلایەن ${esc(b.admin_profiles.name)}</span>`:''}</div>
   </div>`;
 }
 
@@ -271,7 +271,7 @@ function openBook(id){
     <div class="mclose" id="mclose">&#10005; داخستن</div>
     <div class="mcover">${b.cover_url ? `<img src="${esc(b.cover_url)}">` : '📖'}</div>
     <h3>${esc(b.title)}</h3>
-    <p class="msub">${esc(b.author)}</p>
+    <p class="msub">${esc(b.author)}${b.admin_profiles?' &middot; زیادکراوە لەلایەن '+esc(b.admin_profiles.name):''} &middot; 👁 <bdi>${b.views||0}</bdi> بینین</p>
     <p class="mbody">${esc(b.summary || 'هیچ پوختەیەک نووسراوە نییە.')}</p>`;
   document.getElementById('overlay').classList.add('open');
   document.getElementById('mclose').onclick = closeModal;
@@ -281,9 +281,9 @@ function openPost(id){
   const p = DATA.posts.find(x => String(x.id) === String(id));
   if (!p) return;
   bumpViewOnce('post', p.id);
-  const when = new Date(p.created_at).toLocaleDateString('en-GB');
-  let meta = `${p.admin_profiles ? esc(p.admin_profiles.name)+' &middot; ' : ''}${when}`;
-  if (p.type === 'seminar') meta = `${p.event_date||''} ${p.event_time||''} &middot; ${esc(p.location||'')}`;
+  const when = `<bdi>${new Date(p.created_at).toLocaleDateString('en-GB')}</bdi>`;
+  let meta = `${p.admin_profiles ? 'لەلایەن '+esc(p.admin_profiles.name)+' &middot; ' : ''}${when} &middot; 👁 <bdi>${p.views||0}</bdi> بینین`;
+  if (p.type === 'seminar') meta = `${p.admin_profiles ? 'لەلایەن '+esc(p.admin_profiles.name)+' &middot; ' : ''}<bdi>${esc(p.event_date||'')} ${esc(p.event_time||'')}</bdi> &middot; 📍 ${esc(p.location||'')} &middot; 👁 <bdi>${p.views||0}</bdi> بینین`;
   document.getElementById('modal').innerHTML = `
     <div class="mclose" id="mclose">&#10005; داخستن</div>
     <h3>${esc(p.title)}</h3>
@@ -301,21 +301,22 @@ function renderPostsList(type, title, emptyText){
   let html = `<h2 class="section">${title}</h2><div class="list">`;
   if (!list.length) html += `<div class="empty">${emptyText}</div>`;
   else list.forEach(p => {
-    const when = new Date(p.created_at).toLocaleDateString('en-GB');
+    const when = `<bdi>${new Date(p.created_at).toLocaleDateString('en-GB')}</bdi>`;
+    const who = p.admin_profiles ? esc(p.admin_profiles.name)+' &middot; ' : '';
     if (type === 'seminar') {
       const d = p.event_date ? new Date(p.event_date) : null;
       const day = d ? d.getDate() : '--';
       const isPast = d && d < new Date(new Date().toDateString());
       html += `<div class="row-card ${isPast?'done':''}" data-post="${p.id}">
-        <div class="date-box"><b>${day}</b><span>${d? d.toLocaleDateString('en-GB',{month:'short'}) : ''}</span></div>
+        <div class="date-box"><b><bdi>${day}</bdi></b><span>${d? d.toLocaleDateString('en-GB',{month:'short'}) : ''}</span></div>
         <div><p class="row-title">${esc(p.title)}</p>
-        <p class="row-meta">${isPast ? 'تەواوبوو' : `🕐 ${esc(p.event_time||'')} &middot; 📍 ${esc(p.location||'')}`}</p></div>
+        <p class="row-meta">${who}${isPast ? 'تەواوبوو' : `🕐 <bdi>${esc(p.event_time||'')}</bdi> &middot; 📍 ${esc(p.location||'')}`} &middot; 👁 <bdi>${p.views||0}</bdi></p></div>
       </div>`;
     } else {
       html += `<div class="row-card" data-post="${p.id}">
         <div class="icon-box">${type==='activity'?'📷':'✍️'}</div>
         <div><p class="row-title">${esc(p.title)}</p>
-        <p class="row-meta">${p.admin_profiles?esc(p.admin_profiles.name)+' &middot; ':''}${when} &middot; 👁 ${p.views||0}</p></div>
+        <p class="row-meta">${who}${when} &middot; 👁 <bdi>${p.views||0}</bdi></p></div>
       </div>`;
     }
   });
