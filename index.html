@@ -156,7 +156,7 @@ function bumpViewOnce(kind, id){
 }
 
 async function loadAll(){
-  const [{data:cats}, {data:books}, {data:posts}, {data:admins}, {data:settings}, {data:messages}] = await Promise.all([
+  const results = await Promise.all([
     sb.from('categories').select('*').order('id'),
     sb.from('books').select('*, admin_profiles(name)').order('created_at',{ascending:false}),
     sb.from('posts').select('*, admin_profiles(name)').order('created_at',{ascending:false}),
@@ -164,6 +164,11 @@ async function loadAll(){
     sb.from('site_settings').select('*').eq('id',1).maybeSingle(),
     sb.from('messages').select('*').order('created_at',{ascending:false})
   ]);
+  const errs = results.map(r=>r.error).filter(Boolean);
+  if(errs.length){
+    document.getElementById('app').innerHTML = '<div class="empty" style="color:#ff8a8a">هەڵەی بارکردنی داتا: '+esc(errs[0].message)+'</div>';
+  }
+  const [{data:cats}, {data:books}, {data:posts}, {data:admins}, {data:settings}, {data:messages}] = results;
   DATA.cats = cats||[]; DATA.books = books||[]; DATA.posts = posts||[];
   DATA.admins = admins||[]; DATA.settings = settings||null;
   const now = new Date();
