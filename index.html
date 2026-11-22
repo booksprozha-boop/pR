@@ -221,7 +221,13 @@ async function loadAll(){
   DATA.cats = cats||[]; DATA.books = books||[]; DATA.posts = posts||[];
   DATA.admins = admins||[]; DATA.settings = settings||null;
   const now = new Date();
+  const rawMsgCount = (messages||[]).length;
   DATA.messages = (messages||[]).filter(m => !m.expires_at || new Date(m.expires_at) > now);
+  if (rawMsgCount && !DATA.messages.length) {
+    document.getElementById('errbanner').innerHTML += '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">تێبینی: '+rawMsgCount+' ئاگادارکردنەوە هەیە بەڵام هەموویان بەسەرچوون.</div>';
+  } else if (!rawMsgCount) {
+    document.getElementById('errbanner').innerHTML += '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">تێبینی: هیچ ئاگادارکردنەوەیەک لە داتابەیس نەهاتووە.</div>';
+  }
   renderTicker();
   render();
 }
