@@ -6,7 +6,7 @@
 <title>کتێبخانە</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 :root{
@@ -31,7 +31,8 @@ body{margin:0;min-height:100vh;background:
     radial-gradient(800px 500px at 110% 10%, var(--acc2), transparent 60%),
     linear-gradient(160deg,var(--bg1),var(--bg2));
   background-attachment:fixed;
-  color:var(--txt);font-family:'Vazirmatn',-apple-system,'Segoe UI',Tahoma,sans-serif;line-height:1.7;transition:color .2s}
+  color:var(--txt);font-family:'Vazirmatn',-apple-system,'Segoe UI',Tahoma,sans-serif;line-height:1.8;transition:color .2s}
+h1,h2,h3,.logo,.title,.row-title,.name{font-weight:800}
 .theme-btn{width:34px;height:34px;border-radius:50%;backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--txt);flex-shrink:0;transition:transform .15s}
 .theme-btn:hover{transform:scale(1.08) rotate(10deg)}
 .glass{position:relative;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.25), inset 0 0 0 1px rgba(255,255,255,.02), 0 8px 24px rgba(0,0,0,.35)}
@@ -80,7 +81,7 @@ a{color:inherit;text-decoration:none}
 .added-by{font-size:9px;color:var(--txt3);opacity:.75;margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.1px}
 .modal .added-by{margin:-4px 0 12px;font-size:10.5px}
 .empty{color:var(--txt2);font-size:13px;padding:30px 0;text-align:center}
-h2.section{font-size:17px;font-weight:600;margin:0 0 16px}
+h2.section{font-size:18px;font-weight:800;margin:0 0 16px;letter-spacing:.2px}
 .list{display:flex;flex-direction:column;gap:12px}
 .row-card{position:relative;overflow:hidden;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 8px 22px rgba(0,0,0,.3);border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:center;cursor:pointer;transition:transform .15s,box-shadow .15s}
 .row-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.14),transparent 50%);pointer-events:none}
@@ -90,11 +91,11 @@ h2.section{font-size:17px;font-weight:600;margin:0 0 16px}
 .date-box{position:relative;width:56px;height:56px;border-radius:10px;background:linear-gradient(160deg,rgba(255,185,90,.3),rgba(255,185,90,.12));border:1px solid rgba(255,207,138,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0}
 .date-box b{font-size:16px;font-weight:600}
 .date-box span{font-size:10px}
-.row-title{font-weight:600;font-size:14.5px;margin:0 0 3px}
+.row-title{font-weight:800;font-size:15px;margin:0 0 3px}
 .row-meta{font-size:12px;color:var(--txt2);margin:0}
 .about-card{position:relative;overflow:hidden;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 10px 26px rgba(0,0,0,.3);border-radius:14px;padding:18px;margin-bottom:18px}
 .about-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.14),transparent 50%);pointer-events:none}
-.about-card h3{position:relative;font-size:16px;margin:0 0 8px}
+.about-card h3{position:relative;font-size:17px;font-weight:800;margin:0 0 8px}
 .about-card p{position:relative;font-size:13px;color:var(--txt2)}
 .social-row{position:relative;display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .social-pill{backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.35);color:var(--txt);font-size:12.5px;font-weight:500;padding:9px 16px;border-radius:11px;display:flex;align-items:center;gap:7px;transition:transform .18s,box-shadow .18s,border-color .18s}
@@ -109,7 +110,7 @@ h2.section{font-size:17px;font-weight:600;margin:0 0 16px}
 .admin-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.14),transparent 50%);pointer-events:none}
 .avatar{position:relative;width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));margin:0 auto 12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:22px;overflow:hidden;box-shadow:0 0 0 3px rgba(255,255,255,.12),0 0 0 4px rgba(91,140,255,.35),0 8px 18px rgba(91,140,255,.3)}
 .avatar img{width:100%;height:100%;object-fit:cover}
-.admin-card .name{position:relative;font-size:14.5px;font-weight:700;margin:0 0 3px;letter-spacing:.2px}
+.admin-card .name{position:relative;font-size:15px;font-weight:800;margin:0 0 3px;letter-spacing:.2px}
 .admin-card .role{position:relative;font-size:11.5px;color:var(--txt2);margin:0 0 12px;min-height:14px}
 .admin-socials{position:relative;display:flex;gap:8px;justify-content:center}
 .admin-socials a{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);color:var(--txt2);transition:transform .15s,color .15s,border-color .15s}
@@ -123,7 +124,7 @@ footer.site .social-row{margin-top:0}
 .modal .mclose{float:left;cursor:pointer;color:var(--txt2);font-size:13px}
 .modal .mcover{width:140px;aspect-ratio:3/4;border-radius:10px;margin:0 0 14px;background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.03));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:var(--txt3);overflow:hidden}
 .modal .mcover img{width:100%;height:100%;object-fit:cover}
-.modal h3{margin:0 0 2px;font-size:17px}
+.modal h3{margin:0 0 2px;font-size:18px;font-weight:800}
 .modal .msub{color:var(--txt2);font-size:12.5px;margin:0 0 14px}
 .modal .mbody{font-size:14px;color:var(--txt2);white-space:pre-wrap;line-height:1.9}
 @media(max-width:560px){
@@ -221,13 +222,7 @@ async function loadAll(){
   DATA.cats = cats||[]; DATA.books = books||[]; DATA.posts = posts||[];
   DATA.admins = admins||[]; DATA.settings = settings||null;
   const now = new Date();
-  const rawMsgCount = (messages||[]).length;
   DATA.messages = (messages||[]).filter(m => !m.expires_at || new Date(m.expires_at) > now);
-  if (rawMsgCount && !DATA.messages.length) {
-    document.getElementById('errbanner').innerHTML += '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">تێبینی: '+rawMsgCount+' ئاگادارکردنەوە هەیە بەڵام هەموویان بەسەرچوون.</div>';
-  } else if (!rawMsgCount) {
-    document.getElementById('errbanner').innerHTML += '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">تێبینی: هیچ ئاگادارکردنەوەیەک لە داتابەیس نەهاتووە.</div>';
-  }
   renderTicker();
   render();
 }
@@ -438,11 +433,7 @@ function renderAbout(){
     </div>
     <footer class="site">
       <p>کتێبخانە &middot; پڕۆژەی کتێب</p>
-      <div class="social-row">
-        ${socialIcon(s.facebook_url,'ti-brand-facebook')}
-        ${socialIcon(s.instagram_url,'ti-brand-instagram')}
-        ${socialIcon(s.youtube_url,'ti-brand-youtube')}
-      </div>
+      <p>ئەم ویب سایتە دروستکراوە لەلایەن بیلال کامەران</p>
     </footer>`;
 }
 
