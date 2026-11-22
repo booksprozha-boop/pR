@@ -77,6 +77,8 @@ a{color:inherit;text-decoration:none}
 .card .title{font-weight:600;font-size:12px;line-height:1.4;margin:0 0 2px}
 .card .author{font-size:10.5px;color:var(--txt2);margin:0 0 6px}
 .meta-row{display:flex;gap:10px;font-size:10.5px;color:var(--txt3)}
+.added-by{font-size:9px;color:var(--txt3);opacity:.75;margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.1px}
+.modal .added-by{margin:-4px 0 12px;font-size:10.5px}
 .empty{color:var(--txt2);font-size:13px;padding:30px 0;text-align:center}
 h2.section{font-size:17px;font-weight:600;margin:0 0 16px}
 .list{display:flex;flex-direction:column;gap:12px}
@@ -260,7 +262,8 @@ function bookCard(b){
     </div>
     <p class="title">${esc(b.title)}</p>
     <p class="author">${esc(b.author)}</p>
-    <div class="meta-row"><span>${EYE_SVG} <bdi>${b.views||0}</bdi> بینین</span>${b.admin_profiles?`<span>&middot; زیادکراوە لەلایەن ${esc(b.admin_profiles.name)}</span>`:''}</div>
+    <div class="meta-row"><span>${EYE_SVG} <bdi>${b.views||0}</bdi></span></div>
+    ${b.admin_profiles?`<p class="added-by">زیادکراوە لەلایەن ${esc(b.admin_profiles.name)}</p>`:''}
   </div>`;
 }
 
@@ -343,7 +346,8 @@ function openBook(id){
     <div class="mclose" id="mclose">&#10005; داخستن</div>
     <div class="mcover">${b.cover_url ? `<img src="${esc(b.cover_url)}">` : '📖'}</div>
     <h3>${esc(b.title)}</h3>
-    <p class="msub">${esc(b.author)}${b.admin_profiles?' &middot; زیادکراوە لەلایەن '+esc(b.admin_profiles.name):''} &middot; ${EYE_SVG} <bdi>${b.views||0}</bdi> بینین</p>
+    <p class="msub">${esc(b.author)} &middot; ${EYE_SVG} <bdi>${b.views||0}</bdi></p>
+    ${b.admin_profiles?`<p class="added-by">زیادکراوە لەلایەن ${esc(b.admin_profiles.name)}</p>`:''}
     <p class="mbody">${esc(b.summary || 'هیچ پوختەیەک نووسراوە نییە.')}</p>`;
   document.getElementById('overlay').classList.add('open');
   document.getElementById('mclose').onclick = closeModal;
@@ -354,12 +358,13 @@ function openPost(id){
   if (!p) return;
   bumpViewOnce('post', p.id);
   const when = `<bdi>${new Date(p.created_at).toLocaleDateString('en-GB')}</bdi>`;
-  let meta = `${p.admin_profiles ? 'لەلایەن '+esc(p.admin_profiles.name)+' &middot; ' : ''}${when} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi> بینین`;
-  if (p.type === 'seminar') meta = `${p.admin_profiles ? 'لەلایەن '+esc(p.admin_profiles.name)+' &middot; ' : ''}<bdi>${esc(p.event_date||'')} ${esc(p.event_time||'')}</bdi> &middot; 📍 ${esc(p.location||'')} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi> بینین`;
+  let meta = `${when} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi>`;
+  if (p.type === 'seminar') meta = `<bdi>${esc(p.event_date||'')} ${esc(p.event_time||'')}</bdi> &middot; 📍 ${esc(p.location||'')} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi>`;
   document.getElementById('modal').innerHTML = `
     <div class="mclose" id="mclose">&#10005; داخستن</div>
     <h3>${esc(p.title)}</h3>
     <p class="msub">${meta}</p>
+    ${p.admin_profiles?`<p class="added-by">زیادکراوە لەلایەن ${esc(p.admin_profiles.name)}</p>`:''}
     <p class="mbody">${esc(p.body||'')}</p>`;
   document.getElementById('overlay').classList.add('open');
   document.getElementById('mclose').onclick = closeModal;
@@ -374,7 +379,7 @@ function renderPostsList(type, title, emptyText){
   if (!list.length) html += `<div class="empty">${emptyText}</div>`;
   else list.forEach(p => {
     const when = `<bdi>${new Date(p.created_at).toLocaleDateString('en-GB')}</bdi>`;
-    const who = p.admin_profiles ? esc(p.admin_profiles.name)+' &middot; ' : '';
+    const who = p.admin_profiles ? `<p class="added-by">زیادکراوە لەلایەن ${esc(p.admin_profiles.name)}</p>` : '';
     if (type === 'seminar') {
       const d = p.event_date ? new Date(p.event_date) : null;
       const day = d ? d.getDate() : '--';
@@ -382,13 +387,13 @@ function renderPostsList(type, title, emptyText){
       html += `<div class="row-card ${isPast?'done':''}" data-post="${p.id}">
         <div class="date-box"><b><bdi>${day}</bdi></b><span>${d? d.toLocaleDateString('en-GB',{month:'short'}) : ''}</span></div>
         <div><p class="row-title">${esc(p.title)}</p>
-        <p class="row-meta">${who}${isPast ? 'تەواوبوو' : `🕐 <bdi>${esc(p.event_time||'')}</bdi> &middot; 📍 ${esc(p.location||'')}`} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi></p></div>
+        <p class="row-meta">${isPast ? 'تەواوبوو' : `🕐 <bdi>${esc(p.event_time||'')}</bdi> &middot; 📍 ${esc(p.location||'')}`} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi></p>${who}</div>
       </div>`;
     } else {
       html += `<div class="row-card" data-post="${p.id}">
         <div class="icon-box">${type==='activity'?'📷':'✍️'}</div>
         <div><p class="row-title">${esc(p.title)}</p>
-        <p class="row-meta">${who}${when} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi></p></div>
+        <p class="row-meta">${when} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi></p>${who}</div>
       </div>`;
     }
   });
