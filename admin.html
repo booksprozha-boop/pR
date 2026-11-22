@@ -123,12 +123,14 @@ async function doLogin(){
 }
 
 async function checkAdmin(){
-  const { data: { user } } = await sb.auth.getUser();
+  const { data: { user }, error: uerr } = await sb.auth.getUser();
+  if(uerr){ document.getElementById('loginMsg').innerHTML = '<div class="msg err">هەڵەی getUser: '+esc(uerr.message)+'</div>'; return; }
   if(!user){ return; }
-  const { data: prof } = await sb.from('admin_profiles').select('*').eq('id', user.id).maybeSingle();
+  const { data: prof, error: perr } = await sb.from('admin_profiles').select('*').eq('id', user.id).maybeSingle();
+  if(perr){ document.getElementById('loginMsg').innerHTML = '<div class="msg err">هەڵەی خوێندنەوە: '+esc(perr.message)+' (UID: '+esc(user.id)+')</div>'; return; }
   if(!prof){
     await sb.auth.signOut();
-    document.getElementById('loginMsg').innerHTML = '<div class="msg err">ئەم هەژمارە ئادمین نیە</div>';
+    document.getElementById('loginMsg').innerHTML = '<div class="msg err">ئەم هەژمارە ئادمین نیە (UID: '+esc(user.id)+')</div>';
     return;
   }
   ME = prof;
