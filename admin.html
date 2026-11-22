@@ -111,6 +111,22 @@ let activeTab = 'books';
 
 function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
+async function uploadImage(bucket, file, urlInputId, msgElId, previewId){
+  const msgEl = document.getElementById(msgElId);
+  if(msgEl) msgEl.innerHTML = '<div class="msg ok">ئەپلۆدکردن...</div>';
+  const ext = (file.name.split('.').pop()||'jpg').toLowerCase();
+  const path = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())) + '.' + ext;
+  const { error } = await sb.storage.from(bucket).upload(path, file, { upsert: true });
+  if(error){
+    if(msgEl) msgEl.innerHTML = '<div class="msg err">هەڵەی ئەپلۆد: '+esc(error.message)+'</div>';
+    return;
+  }
+  const { data } = sb.storage.from(bucket).getPublicUrl(path);
+  document.getElementById(urlInputId).value = data.publicUrl;
+  if(msgEl) msgEl.innerHTML = '<div class="msg ok">وێنە ئەپلۆد کرا ✓</div>';
+  if(previewId){ const p = document.getElementById(previewId); if(p){ p.src = data.publicUrl; p.style.display='inline-block'; } }
+}
+
 async function doLogin(){
   const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPass').value;
@@ -186,13 +202,18 @@ async function renderBooks(){
         <div><label>نووسەر</label><input id="b_author"></div>
         <div><label>پۆل</label><select id="b_cat"><option value="">— هیچ —</option>${catOpts}</select></div>
       </div>
-      <label>لینکی وێنەی بەرگ (URL)</label><input id="b_cover" placeholder="https://...">
+      <label>وێنەی بەرگ</label>
+      <input id="b_cover" placeholder="https://... (یان وێنە ئەپلۆد بکە)">
+      <input id="b_cover_file" type="file" accept="image/*" style="margin-top:6px">
+      <img id="b_cover_prev" style="display:none;max-width:100px;max-height:140px;border-radius:8px;margin-top:8px">
+      <div id="b_upload_msg"></div>
       <label>کورتەی کتێب</label><textarea id="b_summary"></textarea>
       <button class="btn primary" style="margin-top:12px" onclick="addBook()">زیادکردن</button>
       <div id="b_msg"></div>
     </div>
     <div class="list" id="b_list"></div>
   `;
+  document.getElementById('b_cover_file').onchange = (e)=>{ const f=e.target.files[0]; if(f) uploadImage('covers', f, 'b_cover', 'b_upload_msg', 'b_cover_prev'); };
   const list = document.getElementById('b_list');
   if(!books || !books.length){ list.innerHTML = '<div class="empty">هیچ کتێبێک نیە</div>'; return; }
   list.innerHTML = books.map(b=>`
@@ -250,13 +271,18 @@ async function renderPosts(type){
         <div><label>کات</label><input id="p_time" type="time"></div>
       </div>
       <label>شوێن</label><input id="p_loc">` : ''}
-      <label>لینکی وێنە (URL)</label><input id="p_cover" placeholder="https://...">
+      <label>وێنە</label>
+      <input id="p_cover" placeholder="https://... (یان وێنە ئەپلۆد بکە)">
+      <input id="p_cover_file" type="file" accept="image/*" style="margin-top:6px">
+      <img id="p_cover_prev" style="display:none;max-width:100px;max-height:140px;border-radius:8px;margin-top:8px">
+      <div id="p_upload_msg"></div>
       <label>ناوەڕۆک</label><textarea id="p_body"></textarea>
       <button class="btn primary" style="margin-top:12px" onclick="addPost('${type}')">زیادکردن</button>
       <div id="p_msg"></div>
     </div>
     <div class="list" id="p_list"></div>
   `;
+  document.getElementById('p_cover_file').onchange = (e)=>{ const f=e.target.files[0]; if(f) uploadImage('covers', f, 'p_cover', 'p_upload_msg', 'p_cover_prev'); };
   const list = document.getElementById('p_list');
   if(!posts || !posts.length){ list.innerHTML = '<div class="empty">هیچ نیە</div>'; return; }
   list.innerHTML = posts.map(p=>`
@@ -309,7 +335,11 @@ async function renderProfile(){
       <h2 class="section">پڕۆفایلی من</h2>
       <label>ناو</label><input id="pr_name" value="${esc(ME.name||'')}">
       <label>بایۆگرافیا</label><textarea id="pr_bio">${esc(ME.bio||'')}</textarea>
-      <label>لینکی وێنەی پڕۆفایل (URL)</label><input id="pr_photo" value="${esc(ME.photo_url||'')}">
+      <label>وێنەی پڕۆفایل</label>
+      <input id="pr_photo" value="${esc(ME.photo_url||'')}" placeholder="https://... (یان وێنە ئەپلۆد بکە)">
+      <input id="pr_photo_file" type="file" accept="image/*" style="margin-top:6px">
+      <img id="pr_photo_prev" src="${esc(ME.photo_url||'')}" style="display:${ME.photo_url?'inline-block':'none'};width:60px;height:60px;border-radius:50%;object-fit:cover;margin-top:8px">
+      <div id="pr_upload_msg"></div>
       <div class="row2">
         <div><label>فەیسبوک</label><input id="pr_fb" value="${esc(ME.facebook_url||'')}"></div>
         <div><label>ئینستاگرام</label><input id="pr_ig" value="${esc(ME.instagram_url||'')}"></div>
@@ -319,6 +349,7 @@ async function renderProfile(){
       <div id="pr_msg"></div>
     </div>
   `;
+  document.getElementById('pr_photo_file').onchange = (e)=>{ const f=e.target.files[0]; if(f) uploadImage('avatars', f, 'pr_photo', 'pr_upload_msg', 'pr_photo_prev'); };
 }
 async function saveProfile(){
   const upd = {
