@@ -6,7 +6,7 @@
 <title>پانێلی ئادمین - کتێبخانە</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 :root{
@@ -22,7 +22,8 @@ body{margin:0;min-height:100vh;background:
     radial-gradient(800px 500px at 110% 10%, rgba(138,108,255,.15), transparent 60%),
     linear-gradient(160deg,var(--bg1),var(--bg2));
   background-attachment:fixed;
-  color:var(--txt);font-family:'Vazirmatn',-apple-system,'Segoe UI',Tahoma,sans-serif;line-height:1.7}
+  color:var(--txt);font-family:'Vazirmatn',-apple-system,'Segoe UI',Tahoma,sans-serif;line-height:1.8}
+h1,h2,h3,.section{font-weight:800}
 .wrap{max-width:960px;margin:0 auto;padding:20px 20px 60px}
 a{color:inherit}
 h1{font-size:19px;margin:0}
@@ -342,6 +343,8 @@ async function editPost(id,type){
 async function renderProfile(){
   const panel = document.getElementById('panel');
   const { data: admins } = await sb.from('admin_profiles').select('*').order('created_at');
+  const ownerId = admins && admins.length ? admins[0].id : null;
+  const isOwner = ownerId === ME.id;
   panel.innerHTML = `
     <div class="card">
       <h2 class="section">پڕۆفایلی من</h2>
@@ -361,34 +364,44 @@ async function renderProfile(){
       <div id="pr_msg"></div>
     </div>
 
+    ${isOwner ? `
     <div class="card" style="margin-top:16px">
       <h2 class="section">زیادکردنی ئادمینی نوێ</h2>
       <p style="font-size:12px;color:#aab;margin:0 0 10px">پێشتر لە Supabase Dashboard → Authentication → Users، یوزەرێک بە ئیمەیل و وشەی نهێنی دروست بکە، پاشان لێرە UID ـی (لە ستوونی UID) و ناوێک بۆی بنووسە.</p>
       <label>UID (لە Authentication → Users ـەوە کۆپی بکە)</label><input id="na_uid" placeholder="e.g. aa549056-2503-49d0-9d5e-35f6f7a630e0">
       <label>ناو</label><input id="na_name" placeholder="ناوی ئادمین">
+      <label>وێنە (ئۆپشناڵ — پێویست ناکات)</label>
+      <input id="na_photo" placeholder="https://... (یان وێنە ئەپلۆد بکە)">
+      <input id="na_photo_file" type="file" accept="image/*" style="margin-top:6px">
+      <img id="na_photo_prev" style="display:none;width:50px;height:50px;border-radius:50%;object-fit:cover;margin-top:8px">
+      <div id="na_upload_msg"></div>
       <button class="btn primary" style="margin-top:12px" onclick="addAdmin()">زیادکردنی ئادمین</button>
       <div id="na_msg"></div>
-    </div>
+    </div>` : ''}
 
     <div class="list" id="admin_list" style="margin-top:16px">
       ${(admins||[]).map(a=>`
         <div class="item">
-          <div><div class="t">${esc(a.name||'(بێ ناو)')}</div><div class="s">${esc(a.id)}</div></div>
+          <div><div class="t">${esc(a.name||'(بێ ناو)')}${a.id===ownerId?' 👑':''}</div><div class="s">${esc(a.id)}</div></div>
           <div class="acts">
-            ${a.id!==ME.id?`<button class="btn sm danger" onclick="removeAdmin('${a.id}')">لابردنی دەسەڵات</button>`:'<span style="font-size:11px;color:#8a8">تۆیت</span>'}
+            ${isOwner && a.id!==ME.id?`<button class="btn sm danger" onclick="removeAdmin('${a.id}')">لابردنی دەسەڵات</button>`:''}
+            ${a.id===ME.id?'<span style="font-size:11px;color:#8a8">تۆیت</span>':''}
           </div>
         </div>
       `).join('') || '<div class="empty">هیچ ئادمینێک نیە</div>'}
     </div>
   `;
   document.getElementById('pr_photo_file').onchange = (e)=>{ const f=e.target.files[0]; if(f) uploadImage('avatars', f, 'pr_photo', 'pr_upload_msg', 'pr_photo_prev'); };
+  const naFile = document.getElementById('na_photo_file');
+  if(naFile) naFile.onchange = (e)=>{ const f=e.target.files[0]; if(f) uploadImage('avatars', f, 'na_photo', 'na_upload_msg', 'na_photo_prev'); };
 }
 async function addAdmin(){
   const uid = document.getElementById('na_uid').value.trim();
   const name = document.getElementById('na_name').value.trim();
+  const photo_url = document.getElementById('na_photo').value.trim() || null;
   const msgEl = document.getElementById('na_msg');
   if(!uid || !name){ msgEl.innerHTML = '<div class="msg err">UID و ناو پێویستە</div>'; return; }
-  const { error } = await sb.from('admin_profiles').insert({ id: uid, name });
+  const { error } = await sb.from('admin_profiles').insert({ id: uid, name, photo_url });
   if(error){ msgEl.innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
   msgEl.innerHTML = '<div class="msg ok">ئادمین زیادکرا ✓ — ئێستا دەتوانێت بچێتە ژوورەوە</div>';
   renderProfile();
