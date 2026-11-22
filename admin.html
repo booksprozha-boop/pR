@@ -200,7 +200,9 @@ async function renderBooks(){
       <label>ناونیشان</label><input id="b_title">
       <div class="row2">
         <div><label>نووسەر</label><input id="b_author"></div>
-        <div><label>پۆل</label><select id="b_cat"><option value="">— هیچ —</option>${catOpts}</select></div>
+        <div><label>پۆل</label><select id="b_cat" onchange="document.getElementById('b_cat_new_wrap').style.display=(this.value==='__new__'?'block':'none')"><option value="">— هیچ —</option>${catOpts}<option value="__new__">+ پۆلی نوێ...</option></select>
+          <div id="b_cat_new_wrap" style="display:none;margin-top:6px"><input id="b_cat_new" placeholder="ناوی پۆلی نوێ بنووسە"></div>
+        </div>
       </div>
       <label>وێنەی بەرگ</label>
       <input id="b_cover" placeholder="https://... (یان وێنە ئەپلۆد بکە)">
@@ -229,9 +231,18 @@ async function renderBooks(){
 async function addBook(){
   const title = document.getElementById('b_title').value.trim();
   if(!title){ document.getElementById('b_msg').innerHTML='<div class="msg err">ناونیشان پێویستە</div>'; return; }
+  let catId = document.getElementById('b_cat').value || null;
+  if(catId === '__new__'){
+    const newName = document.getElementById('b_cat_new').value.trim();
+    if(!newName){ document.getElementById('b_msg').innerHTML='<div class="msg err">ناوی پۆلی نوێ بنووسە</div>'; return; }
+    const { data: newCat, error: catErr } = await sb.from('categories').insert({ name: newName }).select().single();
+    if(catErr){ document.getElementById('b_msg').innerHTML = '<div class="msg err">هەڵەی پۆل: '+esc(catErr.message)+'</div>'; return; }
+    CATS.push(newCat);
+    catId = newCat.id;
+  }
   const payload = {
     title, author: document.getElementById('b_author').value.trim()||null,
-    category_id: document.getElementById('b_cat').value || null,
+    category_id: catId,
     cover_url: document.getElementById('b_cover').value.trim()||null,
     summary: document.getElementById('b_summary').value.trim()||null,
     admin_id: ME.id
