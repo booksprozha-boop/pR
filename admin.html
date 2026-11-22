@@ -118,7 +118,7 @@ async function doLogin(){
   msgEl.innerHTML = '';
   if(!email || !pass){ msgEl.innerHTML = '<div class="msg err">ئیمەیل و وشەی نهێنی پڕبکەرەوە</div>'; return; }
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  if(error){ msgEl.innerHTML = '<div class="msg err">هەڵە: ئیمەیل یان وشەی نهێنی هەڵەیە</div>'; return; }
+  if(error){ msgEl.innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
   await checkAdmin();
 }
 
