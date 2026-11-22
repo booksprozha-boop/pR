@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>کتێبخانە</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg1:#10131a; --bg2:#070809;
+  --glass:rgba(255,255,255,.055); --glass-2:rgba(255,255,255,.08);
+  --gborder:rgba(255,255,255,.11); --gborder-2:rgba(255,255,255,.15);
+  --txt:#fff; --txt2:rgba(255,255,255,.55); --txt3:rgba(255,255,255,.4);
+  --blue:#5b8cff; --purple:#8a6cff; --gold:#ffb95a;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--txt);font-family:'Vazirmatn',-apple-system,'Segoe UI',Tahoma,sans-serif;line-height:1.7}
+.wrap{max-width:1040px;margin:0 auto;padding:18px 20px 60px}
+a{color:inherit;text-decoration:none}
+.logo{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:600}
+.logo .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--gold));display:flex;align-items:center;justify-content:center;color:#0a0a0a;font-size:16px;flex-shrink:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav a{font-size:13px;color:var(--txt2);padding:7px 14px;border-radius:10px;white-space:nowrap}
+.nav a.active{background:var(--glass-2);border:1px solid var(--gborder-2);color:var(--txt)}
+.ticker-wrap{overflow:hidden;white-space:nowrap;background:rgba(255,185,90,.1);border:1px solid rgba(255,185,90,.25);border-radius:10px;padding:8px 14px;margin-bottom:16px;color:#ffcf8a;font-size:12.5px}
+.ticker-wrap:empty{display:none}
+.ticker-track{display:inline-block;padding-right:100%;animation:tick 28s linear infinite}
+.ticker-wrap:hover .ticker-track{animation-play-state:paused}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.stat{backdrop-filter:blur(14px);background:var(--glass);border:1px solid var(--gborder);border-radius:12px;padding:10px 6px;text-align:center}
+.stat b{display:block;font-size:17px;font-weight:600}
+.stat span{font-size:10.5px;color:var(--txt2)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{backdrop-filter:blur(14px);background:var(--glass);border:1px solid var(--gborder);color:var(--txt2);font-size:12px;padding:7px 15px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.chip.active{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:transparent}
+.search input{width:100%;background:var(--glass);border:1px solid var(--gborder);border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;outline:none;margin-bottom:16px}
+.search input:focus{border-color:var(--gborder-2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+.card{backdrop-filter:blur(16px);background:var(--glass);border:1px solid var(--gborder);border-radius:14px;padding:10px;cursor:pointer}
+.cover{position:relative;background:rgba(255,255,255,.06);height:150px;border-radius:10px;margin-bottom:9px;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:24px;overflow:hidden}
+.cover img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.badge{position:absolute;top:7px;right:7px;background:rgba(91,140,255,.9);color:#fff;font-size:9.5px;padding:3px 8px;border-radius:6px}
+.menu-btn{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:6px;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;cursor:pointer;z-index:2}
+.menu-pop{position:absolute;top:30px;left:6px;background:#1c1d23;border:1px solid var(--gborder-2);border-radius:8px;padding:4px;font-size:11.5px;color:#fff;white-space:nowrap;z-index:3;display:none}
+.menu-pop.open{display:block}
+.menu-pop div{padding:6px 10px;border-radius:5px;cursor:pointer}
+.menu-pop div:hover{background:rgba(255,255,255,.08)}
+.card .title{font-weight:600;font-size:13.5px;margin:0 0 2px}
+.card .author{font-size:11.5px;color:var(--txt2);margin:0 0 6px}
+.meta-row{display:flex;gap:10px;font-size:10.5px;color:var(--txt3)}
+.empty{color:var(--txt2);font-size:13px;padding:30px 0;text-align:center}
+h2.section{font-size:17px;font-weight:600;margin:0 0 16px}
+.list{display:flex;flex-direction:column;gap:12px}
+.row-card{backdrop-filter:blur(16px);background:var(--glass);border:1px solid var(--gborder);border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:center;cursor:pointer}
+.icon-box{width:52px;height:52px;border-radius:10px;background:rgba(91,140,255,.18);display:flex;align-items:center;justify-content:center;color:#8bb0ff;flex-shrink:0;font-size:20px}
+.row-card.done{opacity:.55}
+.date-box{width:56px;height:56px;border-radius:10px;background:rgba(255,185,90,.16);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0}
+.date-box b{font-size:16px;font-weight:600}
+.date-box span{font-size:10px}
+.row-title{font-weight:600;font-size:14.5px;margin:0 0 3px}
+.row-meta{font-size:12px;color:var(--txt2);margin:0}
+.about-card{backdrop-filter:blur(16px);background:var(--glass);border:1px solid var(--gborder);border-radius:14px;padding:18px;margin-bottom:18px}
+.about-card h3{font-size:16px;margin:0 0 8px}
+.about-card p{font-size:13px;color:var(--txt2)}
+.social-row{display:flex;gap:8px;margin-top:10px}
+.social-pill{backdrop-filter:blur(14px);background:var(--glass-2);border:1px solid var(--gborder-2);color:#fff;font-size:12px;padding:7px 14px;border-radius:9px;display:flex;align-items:center;gap:6px}
+.admins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.admin-card{backdrop-filter:blur(16px);background:var(--glass);border:1px solid var(--gborder);border-radius:14px;padding:14px;text-align:center}
+.avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));margin:0 auto 8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:15px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.admin-card .name{font-size:13px;font-weight:600;margin:0 0 2px}
+.admin-card .role{font-size:11px;color:var(--txt2);margin:0 0 8px}
+.admin-socials{display:flex;gap:8px;justify-content:center;font-size:15px;color:var(--txt2)}
+footer.site{border-top:1px solid var(--gborder);padding-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+footer.site p{font-size:12px;color:var(--txt3);margin:0}
+footer.site .social-row{margin-top:0}
+.overlay{display:none}
+.overlay.open{display:flex;position:fixed;inset:0;z-index:50;align-items:center;justify-content:center;background:rgba(5,6,8,.6);padding:20px}
+.modal{background:#14161c;border:1px solid var(--gborder-2);border-radius:16px;max-width:520px;width:100%;max-height:85vh;overflow:auto;padding:24px}
+.modal .mclose{float:left;cursor:pointer;color:var(--txt2);font-size:13px}
+.modal .mcover{width:140px;aspect-ratio:3/4;border-radius:10px;margin:0 0 14px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:var(--txt3);overflow:hidden}
+.modal .mcover img{width:100%;height:100%;object-fit:cover}
+.modal h3{margin:0 0 2px;font-size:17px}
+.modal .msub{color:var(--txt2);font-size:12.5px;margin:0 0 14px}
+.modal .mbody{font-size:14px;color:rgba(255,255,255,.8);white-space:pre-wrap;line-height:1.9}
+@media(max-width:560px){
+  .nav{width:100%;order:3;overflow-x:auto;flex-wrap:nowrap}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="ticker" class="ticker-wrap"></div>
+  <div class="topbar">
+    <div class="logo"><span class="mark">📖</span>کتێبخانە</div>
+    <div class="nav" id="nav">
+      <a href="#/" data-r="/">سەرەکی</a>
+      <a href="#/posts" data-r="/posts">وتار</a>
+      <a href="#/seminars" data-r="/seminars">سیمینار</a>
+      <a href="#/activities" data-r="/activities">چالاکی</a>
+      <a href="#/about" data-r="/about">دەربارە</a>
+    </div>
+  </div>
+  <div id="app"></div>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script>
+const SUPABASE_URL = 'https://viynxaoruqktjgakgygv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_CAGeHeQS8MLUAur6pKCXcg_i1MREtnL';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let DATA = { cats: [], books: [], posts: [], admins: [], settings: null, messages: [] };
+let activeCat = null;
+
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function favKey(){ return 'book_favs'; }
+function getFavs(){ try{ return JSON.parse(localStorage.getItem(favKey())||'[]'); }catch(e){ return []; } }
+function toggleFav(id){
+  let f = getFavs();
+  id = String(id);
+  if (f.includes(id)) f = f.filter(x => x !== id); else f.push(id);
+  try{ localStorage.setItem(favKey(), JSON.stringify(f)); }catch(e){}
+}
+function seenKey(kind,id){ return 'seen_' + kind + '_' + id; }
+function bumpViewOnce(kind, id){
+  const k = seenKey(kind, id);
+  try{ if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k,'1'); }catch(e){}
+  const fn = kind === 'book' ? 'bump_book_views' : 'bump_post_views';
+  sb.rpc(fn, { p_id: id }).then(()=>{});
+}
+
+async function loadAll(){
+  const [{data:cats}, {data:books}, {data:posts}, {data:admins}, {data:settings}, {data:messages}] = await Promise.all([
+    sb.from('categories').select('*').order('id'),
+    sb.from('books').select('*').order('created_at',{ascending:false}),
+    sb.from('posts').select('*, admin_profiles(name)').order('created_at',{ascending:false}),
+    sb.from('admin_profiles').select('*').order('created_at'),
+    sb.from('site_settings').select('*').eq('id',1).maybeSingle(),
+    sb.from('messages').select('*').order('created_at',{ascending:false})
+  ]);
+  DATA.cats = cats||[]; DATA.books = books||[]; DATA.posts = posts||[];
+  DATA.admins = admins||[]; DATA.settings = settings||null;
+  const now = new Date();
+  DATA.messages = (messages||[]).filter(m => !m.expires_at || new Date(m.expires_at) > now);
+  renderTicker();
+  render();
+}
+
+function renderTicker(){
+  const el = document.getElementById('ticker');
+  if (!DATA.messages.length){ el.innerHTML=''; return; }
+  const text = DATA.messages.map(m => esc(m.body)).join(' &nbsp;&nbsp;&nbsp;&nbsp; ');
+  el.innerHTML = `<span class="ticker-track">📢 ${text}</span>`;
+}
+
+function route(){ return location.hash.replace('#','') || '/'; }
+
+function setActiveNav(){
+  const r = route();
+  document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.r === r));
+}
+
+function statsBar(){
+  const seminars = DATA.posts.filter(p=>p.type==='seminar').length;
+  const totalViews = DATA.books.reduce((s,b)=>s+(b.views||0),0) + DATA.posts.reduce((s,p)=>s+(p.views||0),0);
+  return `<div class="stats">
+    <div class="stat"><b>${DATA.books.length}</b><span>کتێب</span></div>
+    <div class="stat"><b>${DATA.posts.filter(p=>p.type==='article').length}</b><span>وتار</span></div>
+    <div class="stat"><b>${seminars}</b><span>سیمینار</span></div>
+    <div class="stat"><b>${totalViews}</b><span>بینین</span></div>
+  </div>`;
+}
+
+function bookCard(b){
+  const cat = DATA.cats.find(c=>c.id===b.category_id);
+  const isFav = getFavs().includes(String(b.id));
+  return `<div class="card" data-book="${b.id}">
+    <div class="cover">
+      ${b.cover_url ? `<img src="${esc(b.cover_url)}">` : '📖'}
+      ${cat ? `<span class="badge">${esc(cat.name)}</span>` : ''}
+      <span class="menu-btn" data-menu="${b.id}">&#8942;</span>
+      <div class="menu-pop" data-pop="${b.id}"><div data-fav="${b.id}">${isFav ? '✓ لە دڵخوازەکاندا' : '♡ زیادکردن بۆ دڵخوازەکان'}</div></div>
+    </div>
+    <p class="title">${esc(b.title)}</p>
+    <p class="author">${esc(b.author)}</p>
+    <div class="meta-row"><span>👁 ${b.views||0} بینین</span></div>
+  </div>`;
+}
+
+function renderHome(){
+  const el = document.getElementById('app');
+  let list = DATA.books;
+  if (activeCat) list = list.filter(b => String(b.category_id) === String(activeCat));
+  const chips = `<div class="chips">
+    <span class="chip ${!activeCat?'active':''}" data-cat="">هەموو</span>
+    ${DATA.cats.map(c=>`<span class="chip ${String(activeCat)===String(c.id)?'active':''}" data-cat="${c.id}">${esc(c.name)}</span>`).join('')}
+  </div>`;
+  el.innerHTML = statsBar() + chips +
+    `<div class="search"><input id="search" placeholder="گەڕان بۆ کتێب یان نووسەر..."></div>` +
+    `<div class="grid" id="grid">${list.length ? list.map(bookCard).join('') : '<div class="empty">هیچ کتێبێک نیە</div>'}</div>`;
+  bindHome();
+}
+
+function bindHome(){
+  document.querySelectorAll('.chip[data-cat]').forEach(c => c.onclick = () => {
+    activeCat = c.dataset.cat || null; renderHome();
+  });
+  const s = document.getElementById('search');
+  if (s) s.addEventListener('input', () => {
+    const q = s.value.trim().toLowerCase();
+    let list = DATA.books;
+    if (activeCat) list = list.filter(b => String(b.category_id) === String(activeCat));
+    if (q) list = list.filter(b => (b.title||'').toLowerCase().includes(q) || (b.author||'').toLowerCase().includes(q));
+    document.getElementById('grid').innerHTML = list.length ? list.map(bookCard).join('') : '<div class="empty">هیچ نەدۆزرایەوە</div>';
+    bindCards();
+  });
+  bindCards();
+}
+
+function bindCards(){
+  document.querySelectorAll('[data-book]').forEach(el => el.addEventListener('click', e => {
+    if (e.target.closest('[data-menu]') || e.target.closest('.menu-pop')) return;
+    openBook(el.dataset.book);
+  }));
+  document.querySelectorAll('[data-menu]').forEach(btn => btn.addEventListener('click', e => {
+    e.stopPropagation();
+    document.querySelectorAll('.menu-pop.open').forEach(p => { if (p.dataset.pop !== btn.dataset.menu) p.classList.remove('open'); });
+    const pop = document.querySelector(`.menu-pop[data-pop="${btn.dataset.menu}"]`);
+    if (pop) pop.classList.toggle('open');
+  }));
+  document.querySelectorAll('[data-fav]').forEach(it => it.addEventListener('click', e => {
+    e.stopPropagation();
+    toggleFav(it.dataset.fav);
+    document.querySelectorAll('.menu-pop.open').forEach(p => p.classList.remove('open'));
+    renderHome();
+  }));
+  document.addEventListener('click', () => document.querySelectorAll('.menu-pop.open').forEach(p=>p.classList.remove('open')), { once:true });
+}
+
+function openBook(id){
+  const b = DATA.books.find(x => String(x.id) === String(id));
+  if (!b) return;
+  bumpViewOnce('book', b.id);
+  document.getElementById('modal').innerHTML = `
+    <div class="mclose" id="mclose">&#10005; داخستن</div>
+    <div class="mcover">${b.cover_url ? `<img src="${esc(b.cover_url)}">` : '📖'}</div>
+    <h3>${esc(b.title)}</h3>
+    <p class="msub">${esc(b.author)}</p>
+    <p class="mbody">${esc(b.summary || 'هیچ پوختەیەک نووسراوە نییە.')}</p>`;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('mclose').onclick = closeModal;
+}
+
+function openPost(id){
+  const p = DATA.posts.find(x => String(x.id) === String(id));
+  if (!p) return;
+  bumpViewOnce('post', p.id);
+  const when = new Date(p.created_at).toLocaleDateString('en-GB');
+  let meta = `${p.admin_profiles ? esc(p.admin_profiles.name)+' &middot; ' : ''}${when}`;
+  if (p.type === 'seminar') meta = `${p.event_date||''} ${p.event_time||''} &middot; ${esc(p.location||'')}`;
+  document.getElementById('modal').innerHTML = `
+    <div class="mclose" id="mclose">&#10005; داخستن</div>
+    <h3>${esc(p.title)}</h3>
+    <p class="msub">${meta}</p>
+    <p class="mbody">${esc(p.body||'')}</p>`;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('mclose').onclick = closeModal;
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
+
+function renderPostsList(type, title, emptyText){
+  const el = document.getElementById('app');
+  const list = DATA.posts.filter(p => p.type === type);
+  let html = `<h2 class="section">${title}</h2><div class="list">`;
+  if (!list.length) html += `<div class="empty">${emptyText}</div>`;
+  else list.forEach(p => {
+    const when = new Date(p.created_at).toLocaleDateString('en-GB');
+    if (type === 'seminar') {
+      const d = p.event_date ? new Date(p.event_date) : null;
+      const day = d ? d.getDate() : '--';
+      const isPast = d && d < new Date(new Date().toDateString());
+      html += `<div class="row-card ${isPast?'done':''}" data-post="${p.id}">
+        <div class="date-box"><b>${day}</b><span>${d? d.toLocaleDateString('en-GB',{month:'short'}) : ''}</span></div>
+        <div><p class="row-title">${esc(p.title)}</p>
+        <p class="row-meta">${isPast ? 'تەواوبوو' : `🕐 ${esc(p.event_time||'')} &middot; 📍 ${esc(p.location||'')}`}</p></div>
+      </div>`;
+    } else {
+      html += `<div class="row-card" data-post="${p.id}">
+        <div class="icon-box">${type==='activity'?'📷':'✍️'}</div>
+        <div><p class="row-title">${esc(p.title)}</p>
+        <p class="row-meta">${p.admin_profiles?esc(p.admin_profiles.name)+' &middot; ':''}${when} &middot; 👁 ${p.views||0}</p></div>
+      </div>`;
+    }
+  });
+  html += `</div>`;
+  el.innerHTML = html;
+  document.querySelectorAll('[data-post]').forEach(r => r.onclick = () => openPost(r.dataset.post));
+}
+
+function renderAbout(){
+  const el = document.getElementById('app');
+  const s = DATA.settings || {};
+  const socialIcon = (url, label) => url ? `<a href="${esc(url)}" target="_blank" class="social-pill">${label}</a>` : '';
+  el.innerHTML = `
+    <div class="about-card">
+      <h3>دەربارەی پڕۆژە</h3>
+      <p>پڕۆژەی کتێب هەوڵدانێکە بۆ بڵاوکردنەوەی خوێندنەوە و خۆشەویستی کتێب لەناو کۆمەڵگەدا.</p>
+      <div class="social-row">
+        ${socialIcon(s.facebook_url,'📘 فەیسبوک')}
+        ${socialIcon(s.instagram_url,'📸 ئینستاگرام')}
+        ${socialIcon(s.youtube_url,'▶️ یوتیوب')}
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--txt2);margin:0 0 12px">تیمی ئادمین</p>
+    <div class="admins">
+      ${DATA.admins.map(a => `
+        <div class="admin-card">
+          <div class="avatar">${a.photo_url?`<img src="${esc(a.photo_url)}">`:esc((a.name||'?').slice(0,1))}</div>
+          <p class="name">${esc(a.name)}</p>
+          <p class="role">${esc(a.bio||'')}</p>
+          <div class="admin-socials">
+            ${a.facebook_url?`<a href="${esc(a.facebook_url)}" target="_blank">📘</a>`:''}
+            ${a.instagram_url?`<a href="${esc(a.instagram_url)}" target="_blank">📸</a>`:''}
+            ${a.youtube_url?`<a href="${esc(a.youtube_url)}" target="_blank">▶️</a>`:''}
+          </div>
+        </div>`).join('') || '<div class="empty">هیچ ئادمینێک نیە</div>'}
+    </div>
+    <footer class="site">
+      <p>کتێبخانە &middot; پڕۆژەی کتێب</p>
+      <div class="social-row">
+        ${socialIcon(s.facebook_url,'ti-brand-facebook')}
+        ${socialIcon(s.instagram_url,'ti-brand-instagram')}
+        ${socialIcon(s.youtube_url,'ti-brand-youtube')}
+      </div>
+    </footer>`;
+}
+
+function render(){
+  setActiveNav();
+  const r = route();
+  if (r === '/posts') renderPostsList('article','وتارەکان','هیچ وتارێک نیە');
+  else if (r === '/seminars') renderPostsList('seminar','سیمینارەکان','هیچ سیمینارێک نیە');
+  else if (r === '/activities') renderPostsList('activity','چالاکییەکانی پڕۆژە','هیچ چالاکییەک نیە');
+  else if (r === '/about') renderAbout();
+  else renderHome();
+}
+
+window.addEventListener('hashchange', render);
+loadAll();
+</script>
+</body>
+</html>
