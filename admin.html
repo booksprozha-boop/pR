@@ -210,7 +210,8 @@ async function addBook(){
     title, author: document.getElementById('b_author').value.trim()||null,
     category_id: document.getElementById('b_cat').value || null,
     cover_url: document.getElementById('b_cover').value.trim()||null,
-    summary: document.getElementById('b_summary').value.trim()||null
+    summary: document.getElementById('b_summary').value.trim()||null,
+    admin_id: ME.id
   };
   const { error } = await sb.from('books').insert(payload);
   if(error){ document.getElementById('b_msg').innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
