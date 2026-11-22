@@ -341,6 +341,7 @@ async function editPost(id,type){
 /* ---------- MY PROFILE ---------- */
 async function renderProfile(){
   const panel = document.getElementById('panel');
+  const { data: admins } = await sb.from('admin_profiles').select('*').order('created_at');
   panel.innerHTML = `
     <div class="card">
       <h2 class="section">پڕۆفایلی من</h2>
@@ -359,8 +360,43 @@ async function renderProfile(){
       <button class="btn primary" style="margin-top:12px" onclick="saveProfile()">پاشەکەوتکردن</button>
       <div id="pr_msg"></div>
     </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2 class="section">زیادکردنی ئادمینی نوێ</h2>
+      <p style="font-size:12px;color:#aab;margin:0 0 10px">پێشتر لە Supabase Dashboard → Authentication → Users، یوزەرێک بە ئیمەیل و وشەی نهێنی دروست بکە، پاشان لێرە UID ـی (لە ستوونی UID) و ناوێک بۆی بنووسە.</p>
+      <label>UID (لە Authentication → Users ـەوە کۆپی بکە)</label><input id="na_uid" placeholder="e.g. aa549056-2503-49d0-9d5e-35f6f7a630e0">
+      <label>ناو</label><input id="na_name" placeholder="ناوی ئادمین">
+      <button class="btn primary" style="margin-top:12px" onclick="addAdmin()">زیادکردنی ئادمین</button>
+      <div id="na_msg"></div>
+    </div>
+
+    <div class="list" id="admin_list" style="margin-top:16px">
+      ${(admins||[]).map(a=>`
+        <div class="item">
+          <div><div class="t">${esc(a.name||'(بێ ناو)')}</div><div class="s">${esc(a.id)}</div></div>
+          <div class="acts">
+            ${a.id!==ME.id?`<button class="btn sm danger" onclick="removeAdmin('${a.id}')">لابردنی دەسەڵات</button>`:'<span style="font-size:11px;color:#8a8">تۆیت</span>'}
+          </div>
+        </div>
+      `).join('') || '<div class="empty">هیچ ئادمینێک نیە</div>'}
+    </div>
   `;
   document.getElementById('pr_photo_file').onchange = (e)=>{ const f=e.target.files[0]; if(f) uploadImage('avatars', f, 'pr_photo', 'pr_upload_msg', 'pr_photo_prev'); };
+}
+async function addAdmin(){
+  const uid = document.getElementById('na_uid').value.trim();
+  const name = document.getElementById('na_name').value.trim();
+  const msgEl = document.getElementById('na_msg');
+  if(!uid || !name){ msgEl.innerHTML = '<div class="msg err">UID و ناو پێویستە</div>'; return; }
+  const { error } = await sb.from('admin_profiles').insert({ id: uid, name });
+  if(error){ msgEl.innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
+  msgEl.innerHTML = '<div class="msg ok">ئادمین زیادکرا ✓ — ئێستا دەتوانێت بچێتە ژوورەوە</div>';
+  renderProfile();
+}
+async function removeAdmin(id){
+  if(!confirm('دڵنیایت لە لابردنی دەسەڵاتی ئادمینی؟')) return;
+  await sb.from('admin_profiles').delete().eq('id', id);
+  renderProfile();
 }
 async function saveProfile(){
   const upd = {
