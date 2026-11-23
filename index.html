@@ -4,6 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>کتێبخانە</title>
+<meta name="description" content="پڕۆژەی کتێب &middot; کتێب، وتار، سیمینار و چالاکی">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="کتێبخانە">
+<meta property="og:title" content="کتێبخانە - پڕۆژەی کتێب">
+<meta property="og:description" content="کۆگەیەکی زیندووی کتێب، وتار، سیمینار و چالاکی">
+<meta property="og:image" content="https://booksprozha-boop.github.io/pR/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://booksprozha-boop.github.io/pR/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="کتێبخانە - پڕۆژەی کتێب">
+<meta name="twitter:description" content="کۆگەیەکی زیندووی کتێب، وتار، سیمینار و چالاکی">
+<meta name="twitter:image" content="https://booksprozha-boop.github.io/pR/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -468,6 +481,9 @@ function showToast(msg){
 function showFavToast(added){ showToast(added ? '♥ زیادکرا بۆ دڵخوازەکان' : '♡ لابرا لە دڵخوازەکان'); }
 
 function shareUrl(kind, id){
+  if (kind === 'book' || kind === 'post'){
+    return 'https://viynxaoruqktjgakgygv.supabase.co/functions/v1/share?type=' + kind + '&id=' + encodeURIComponent(id);
+  }
   return location.origin + location.pathname + '#/' + kind + '/' + id;
 }
 async function shareItem(kind, id, title, ev){
@@ -545,12 +561,14 @@ function openPost(id){
 function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
 document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
 
-function renderPostsList(type, title, emptyText){
-  const el = document.getElementById('app');
-  const list = DATA.posts.filter(p => p.type === type);
-  let html = `<h2 class="section">${title}</h2><div class="list">`;
-  if (!list.length) html += `<div class="empty">${emptyText}</div>`;
-  else list.forEach(p => {
+let postSearchQ = { article:'', seminar:'', activity:'' };
+function postsListHTML(type, emptyText){
+  const q = (postSearchQ[type]||'').trim().toLowerCase();
+  let list = DATA.posts.filter(p => p.type === type);
+  if (q) list = list.filter(p => (p.title||'').toLowerCase().includes(q) || (p.body||'').toLowerCase().includes(q));
+  if (!list.length) return `<div class="empty">${q?'هیچ نەدۆزرایەوە':emptyText}</div>`;
+  let html = '';
+  list.forEach(p => {
     const when = `<bdi>${new Date(p.created_at).toLocaleDateString('en-GB')}</bdi>`;
     const who = p.admin_profiles ? `<p class="added-by">زیادکراوە لەلایەن ${esc(p.admin_profiles.name)}</p>` : '';
     if (type === 'seminar') {
@@ -572,12 +590,26 @@ function renderPostsList(type, title, emptyText){
       </div>`;
     }
   });
-  html += `</div>`;
-  el.innerHTML = html;
+  return html;
+}
+function bindPostRows(){
   document.querySelectorAll('[data-post]').forEach(r => r.onclick = (e) => { if(e.target.closest('[data-share-post]')) return; openPost(r.dataset.post); });
   document.querySelectorAll('[data-share-post]').forEach(it => it.addEventListener('click', e => {
     shareItem('post', it.dataset.sharePost, it.dataset.title, e);
   }));
+}
+function renderPostsList(type, title, emptyText){
+  const el = document.getElementById('app');
+  el.innerHTML = `<h2 class="section">${title}</h2>` +
+    `<div class="search"><span class="search-ic">🔍</span><input id="postSearch" placeholder="گەڕان..." value="${esc(postSearchQ[type]||'')}"></div>` +
+    `<div class="list" id="postList">${postsListHTML(type, emptyText)}</div>`;
+  const sInp = document.getElementById('postSearch');
+  if (sInp) sInp.addEventListener('input', () => {
+    postSearchQ[type] = sInp.value;
+    document.getElementById('postList').innerHTML = postsListHTML(type, emptyText);
+    bindPostRows();
+  });
+  bindPostRows();
 }
 
 function renderAbout(){
