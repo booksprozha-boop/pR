@@ -89,6 +89,11 @@ html[data-theme="light"] .ticker-wrap{color:#7a4a08;background:linear-gradient(1
 .chip:hover{transform:translateY(-3px) scale(1.03);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.65),inset 0 -8px 12px -8px rgba(0,0,0,.1),0 12px 26px rgba(24,119,242,.22);color:var(--txt)}
 .chip:active{transform:translateY(-1px) scale(.98)}
 .chip.active{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:rgba(255,255,255,.45);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),inset 0 -8px 12px -8px rgba(0,0,0,.2),0 10px 24px rgba(24,119,242,.45)}
+.searchrow{display:flex;gap:8px;align-items:flex-start}
+.searchrow .search{flex:1}
+.sort-sel{flex-shrink:0;backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);border-radius:10px;padding:10px 12px;color:var(--txt);font-size:12px;outline:none;margin-bottom:16px;cursor:pointer;transition:border-color .2s}
+.sort-sel:focus{border-color:var(--gborder-2)}
+.meta-date{margin-right:auto;color:var(--txt3)}
 .search{position:relative}
 .search-ic{position:absolute;top:50%;right:14px;transform:translateY(-50%);font-size:13px;opacity:.55;pointer-events:none}
 html[dir="rtl"] .search-ic{right:14px}
@@ -120,6 +125,10 @@ html[dir="rtl"] .search-ic{right:14px}
 .card .author{font-size:10.5px;color:var(--txt2);margin:0 0 6px}
 .meta-row{display:flex;gap:10px;font-size:10.5px;color:var(--txt3)}
 .added-by{font-size:9px;color:var(--txt3);opacity:.75;margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.1px}
+.card-pdf-row{display:flex;gap:5px;margin-top:7px}
+.pdf-mini{position:relative;overflow:hidden;flex:1;backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);color:var(--txt);font-size:9.5px;font-weight:700;padding:5px 4px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,color .15s}
+.pdf-mini:hover{transform:translateY(-2px);color:var(--blue);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 16px rgba(24,119,242,.2)}
+.pdf-mini:active{transform:translateY(0) scale(.96)}
 .modal .added-by{margin:-4px 0 12px;font-size:10.5px}
 .empty{color:var(--txt2);font-size:13px;padding:30px 0;text-align:center}
 h2.section{font-size:18px;font-weight:800;margin:0 0 16px;letter-spacing:.2px}
@@ -174,8 +183,16 @@ footer.site .social-row{margin-top:0}
 .modal .mcover{width:140px;aspect-ratio:3/4;border-radius:10px;margin:0 0 14px;background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.03));border:1px solid var(--gborder);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:var(--txt3);overflow:hidden}
 .modal .mcover img{width:100%;height:100%;object-fit:cover}
 .modal h3{margin:0 0 2px;font-size:18px;font-weight:800}
-.modal .msub{color:var(--txt2);font-size:12.5px;margin:0 0 14px}
+.modal .msub{color:var(--txt2);font-size:12.5px;margin:0 0 4px}
+.modal .msub2{display:flex;flex-wrap:wrap;gap:10px;color:var(--txt3);font-size:11.5px;margin:0 0 14px}
 .modal .mbody{font-size:14px;color:var(--txt2);white-space:pre-wrap;line-height:1.9}
+.bio-btn{background:none;border:none;color:var(--blue);font-size:11.5px;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px}
+.bio-box{background:var(--glass);border:1px solid var(--gborder);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--txt2);line-height:1.8;margin:0 0 14px;white-space:pre-wrap}
+.pdf-acts{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn-pdf{position:relative;overflow:hidden;flex:1;min-width:140px;backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);background:linear-gradient(135deg,var(--blue),var(--purple));border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),0 8px 20px rgba(24,119,242,.35);color:#fff;font-size:12.5px;font-weight:700;padding:10px 14px;border-radius:12px;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease}
+.btn-pdf:hover{transform:translateY(-2px);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7),0 12px 26px rgba(24,119,242,.45)}
+.btn-pdf:active{transform:translateY(0) scale(.97)}
+.btn-pdf.dl{background:linear-gradient(135deg,#2a2d35,#15161b)}
 @media(max-width:560px){
   .nav{width:100%;order:3;overflow-x:auto;flex-wrap:nowrap}
   .grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
@@ -213,6 +230,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let DATA = { cats: [], books: [], posts: [], admins: [], settings: null, messages: [] };
 let activeCat = null;
+let activeSort = 'new';
 
 function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
@@ -256,6 +274,10 @@ function bumpViewOnce(kind, id){
   try{ if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k,'1'); }catch(e){}
   const fn = kind === 'book' ? 'bump_book_views' : 'bump_post_views';
   sb.rpc(fn, { p_id: id }).then(()=>{});
+}
+function fmtDate(d){
+  if(!d) return '';
+  return new Date(d).toLocaleDateString('en-GB');
 }
 
 async function loadAll(){
@@ -321,15 +343,36 @@ function bookCard(b){
     </div>
     <p class="title">${esc(b.title)}</p>
     <p class="author">${esc(b.author)}</p>
-    <div class="meta-row"><span>${EYE_SVG} <bdi>${b.views||0}</bdi></span></div>
+    <div class="meta-row"><span>${EYE_SVG} <bdi>${b.views||0}</bdi></span><span class="meta-date"><bdi>${fmtDate(b.created_at)}</bdi></span></div>
     ${b.admin_profiles?`<p class="added-by">زیادکراوە لەلایەن ${esc(b.admin_profiles.name)}</p>`:''}
+    ${b.pdf_url?`<div class="card-pdf-row">
+      <button class="pdf-mini read" data-pdfread="${b.id}">📖 خوێندنەوە</button>
+      <button class="pdf-mini dl" data-pdfdl="${b.id}">⬇️ داگرتن</button>
+    </div>`:''}
   </div>`;
 }
+function pdfRead(b){
+  sb.rpc('bump_book_reads', { p_id: b.id }).then(()=>{});
+  window.open(b.pdf_url, '_blank');
+}
+function pdfDownload(b){
+  sb.rpc('bump_book_downloads', { p_id: b.id }).then(()=>{});
+  const a = document.createElement('a');
+  a.href = b.pdf_url; a.download = ''; a.target = '_blank';
+  document.body.appendChild(a); a.click(); a.remove();
+}
 
+const SORTERS = {
+  new: (a,b) => new Date(b.created_at) - new Date(a.created_at),
+  views: (a,b) => (b.views||0) - (a.views||0),
+  reads: (a,b) => (b.reads||0) - (a.reads||0),
+  downloads: (a,b) => (b.downloads||0) - (a.downloads||0)
+};
 function filteredBooks(){
   let list = DATA.books;
   if (activeCat === '__fav__') { const favs = getFavs(); list = list.filter(b => favs.includes(String(b.id))); }
   else if (activeCat) list = list.filter(b => String(b.category_id) === String(activeCat));
+  list = list.slice().sort(SORTERS[activeSort] || SORTERS.new);
   return list;
 }
 
@@ -341,8 +384,14 @@ function renderHome(){
     ${DATA.cats.map(c=>`<span class="chip ${String(activeCat)===String(c.id)?'active':''}" data-cat="${c.id}">${esc(c.name)}</span>`).join('')}
     <span class="chip ${activeCat==='__fav__'?'active':''}" data-cat="__fav__">♥ دڵخوازەکان</span>
   </div>`;
+  const sortOpts = [
+    ['new','نوێترین'], ['views','زۆرترین بینراو'], ['reads','زۆرترین خوێندراوە'], ['downloads','زۆرترین داگیراو']
+  ].map(([v,l])=>`<option value="${v}" ${activeSort===v?'selected':''}>${l}</option>`).join('');
   el.innerHTML = statsBar() + chips +
-    `<div class="search"><span class="search-ic">🔍</span><input id="search" placeholder="گەڕان بۆ کتێب یان نووسەر..."></div>` +
+    `<div class="searchrow">
+       <div class="search"><span class="search-ic">🔍</span><input id="search" placeholder="گەڕان بۆ کتێب یان نووسەر..."></div>
+       <select id="sortSel" class="sort-sel">${sortOpts}</select>
+     </div>` +
     `<div class="grid" id="grid">${list.length ? list.map(bookCard).join('') : '<div class="empty">هیچ کتێبێک نیە</div>'}</div>`;
   bindHome();
 }
@@ -351,6 +400,8 @@ function bindHome(){
   document.querySelectorAll('.chip[data-cat]').forEach(c => c.onclick = () => {
     activeCat = c.dataset.cat || null; renderHome();
   });
+  const sortSel = document.getElementById('sortSel');
+  if (sortSel) sortSel.addEventListener('change', () => { activeSort = sortSel.value; renderHome(); });
   const s = document.getElementById('search');
   if (s) s.addEventListener('input', () => {
     const q = s.value.trim().toLowerCase();
@@ -364,8 +415,18 @@ function bindHome(){
 
 function bindCards(){
   document.querySelectorAll('[data-book]').forEach(el => el.addEventListener('click', e => {
-    if (e.target.closest('[data-fav]') || e.target.closest('[data-share]')) return;
+    if (e.target.closest('[data-fav]') || e.target.closest('[data-share]') || e.target.closest('[data-pdfread]') || e.target.closest('[data-pdfdl]')) return;
     openBook(el.dataset.book);
+  }));
+  document.querySelectorAll('[data-pdfread]').forEach(it => it.addEventListener('click', e => {
+    e.stopPropagation();
+    const b = DATA.books.find(x => String(x.id) === String(it.dataset.pdfread));
+    if (b) pdfRead(b);
+  }));
+  document.querySelectorAll('[data-pdfdl]').forEach(it => it.addEventListener('click', e => {
+    e.stopPropagation();
+    const b = DATA.books.find(x => String(x.id) === String(it.dataset.pdfdl));
+    if (b) pdfDownload(b);
   }));
   document.querySelectorAll('[data-fav]').forEach(it => it.addEventListener('click', e => {
     e.stopPropagation();
@@ -422,17 +483,38 @@ function openBook(id){
   const b = DATA.books.find(x => String(x.id) === String(id));
   if (!b) return;
   bumpViewOnce('book', b.id);
+  const hasBio = b.author_bio && b.author_bio.trim();
   document.getElementById('modal').innerHTML = `
     <div class="mclose" id="mclose">&#10005; داخستن</div>
     <div class="mshare" id="mshare">${SHARE_SVG} هاوبەشکردن</div>
     <div class="mcover">${b.cover_url ? `<img src="${esc(b.cover_url)}">` : '📖'}</div>
     <h3>${esc(b.title)}</h3>
-    <p class="msub">${esc(b.author)} &middot; ${EYE_SVG} <bdi>${b.views||0}</bdi></p>
+    <p class="msub">${esc(b.author)}${hasBio?` <button class="bio-btn" id="bioBtn">دەربارەی نووسەر</button>`:''}</p>
+    ${hasBio?`<div class="bio-box" id="bioBox" style="display:none">${esc(b.author_bio)}</div>`:''}
+    <p class="msub2">
+      <span>${EYE_SVG} <bdi>${b.views||0}</bdi> بینین</span>
+      ${b.pdf_url?`<span>📖 <bdi>${b.reads||0}</bdi> خوێندنەوە</span><span>⬇️ <bdi>${b.downloads||0}</bdi> داگرتن</span>`:''}
+      <span class="meta-date"><bdi>${fmtDate(b.created_at)}</bdi></span>
+    </p>
     ${b.admin_profiles?`<p class="added-by">زیادکراوە لەلایەن ${esc(b.admin_profiles.name)}</p>`:''}
-    <p class="mbody">${esc(b.summary || 'هیچ پوختەیەک نووسراوە نییە.')}</p>`;
+    <p class="mbody">${esc(b.summary || 'هیچ پوختەیەک نووسراوە نییە.')}</p>
+    ${b.pdf_url?`
+      <div class="pdf-acts">
+        <button class="btn-pdf read" id="pdfReadBtn">📖 خوێندنەوەی PDF</button>
+        <button class="btn-pdf dl" id="pdfDlBtn">⬇️ داگرتنی PDF</button>
+      </div>`:''}`;
   document.getElementById('overlay').classList.add('open');
   document.getElementById('mclose').onclick = closeModal;
   document.getElementById('mshare').onclick = () => shareItem('book', b.id, b.title);
+  const bioBtn = document.getElementById('bioBtn');
+  if (bioBtn) bioBtn.onclick = () => {
+    const box = document.getElementById('bioBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  };
+  const readBtn = document.getElementById('pdfReadBtn');
+  if (readBtn) readBtn.onclick = () => pdfRead(b);
+  const dlBtn = document.getElementById('pdfDlBtn');
+  if (dlBtn) dlBtn.onclick = () => pdfDownload(b);
 }
 
 function openPost(id){
@@ -522,7 +604,7 @@ function renderAbout(){
     <footer class="site">
       <p>کتێبخانە &middot; پڕۆژەی کتێب</p>
       <p>ئەم ویب سایتە دروستکراوە لەلایەن بیلال کامەران</p>
-    </footer>`; 
+    </footer>`;
 }
 
 function render(){
