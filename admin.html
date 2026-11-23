@@ -273,17 +273,23 @@ async function renderBooks(){
       <img id="b_cover_prev" style="display:none;max-width:100px;max-height:140px;border-radius:8px;margin-top:8px">
       <div id="b_upload_msg"></div>
       <label>کورتەی کتێب</label><textarea id="b_summary"></textarea>
+      <label>فایلی PDF (ئۆپشناڵ)</label>
+      <input id="b_pdf" placeholder="https://... (یان فایل ئەپلۆد بکە)">
+      <input id="b_pdf_file" type="file" accept="application/pdf" style="margin-top:6px">
+      <div id="b_pdf_msg"></div>
+      <label>ژیاننامەی نووسەر (ئۆپشناڵ)</label><textarea id="b_bio" placeholder="چەند دێڕێک دەربارەی نووسەرەکە..."></textarea>
       <button class="btn primary" style="margin-top:12px" onclick="addBook()">زیادکردن</button>
       <div id="b_msg"></div>
     </div>
-    <div class="gtable" id="b_list" style="--gcols:44px 2fr 1fr 60px auto"></div>
+    <div class="gtable" id="b_list" style="--gcols:44px 2fr 1fr 70px 70px auto"></div>
   `;
   document.getElementById('b_cover_file').onchange = (e)=>{ const f=e.target.files[0]; if(f) uploadImage('covers', f, 'b_cover', 'b_upload_msg', 'b_cover_prev'); };
+  document.getElementById('b_pdf_file').onchange = (e)=>{ const f=e.target.files[0]; if(f) uploadImage('pdfs', f, 'b_pdf', 'b_pdf_msg'); };
   const list = document.getElementById('b_list');
   if(!books || !books.length){ list.innerHTML = '<div class="empty">هیچ کتێبێک نیە</div>'; return; }
   const catName = (id)=> (CATS.find(c=>c.id===id)||{}).name || '';
   list.innerHTML = `
-    <div class="ghead"><span>وێنە</span><span>ناونیشان / نووسەر</span><span>پۆل</span><span>بینین</span><span>کردار</span></div>
+    <div class="ghead"><span>وێنە</span><span>ناونیشان / نووسەر</span><span>پۆل</span><span>بینین</span><span>PDF</span><span>کردار</span></div>
     <div class="gbody">
       ${books.map(b=>`
         <div class="grow">
@@ -291,6 +297,7 @@ async function renderBooks(){
           <div class="gcell t">${esc(b.title)}<span class="sub">${esc(b.author||'')}</span></div>
           <div class="gcell">${b.category_id?`<span class="gtag">${esc(catName(b.category_id))}</span>`:''}</div>
           <div class="gcell">👁 ${b.views||0}</div>
+          <div class="gcell">${b.pdf_url?`<span class="gtag">📄 ${b.reads||0}/${b.downloads||0}</span>`:'—'}</div>
           <div class="gacts">
             <button class="btn sm" onclick="editBook(${b.id})">دەستکاری</button>
             <button class="btn sm danger" onclick="delRow('books',${b.id})">سڕینەوە</button>
@@ -317,6 +324,8 @@ async function addBook(){
     category_id: catId,
     cover_url: document.getElementById('b_cover').value.trim()||null,
     summary: document.getElementById('b_summary').value.trim()||null,
+    pdf_url: document.getElementById('b_pdf').value.trim()||null,
+    author_bio: document.getElementById('b_bio').value.trim()||null,
     admin_id: ME.id
   };
   const { error } = await sb.from('books').insert(payload);
@@ -329,7 +338,9 @@ async function editBook(id){
   const author = prompt('نووسەر:', b.author||'');
   const cover = prompt('لینکی وێنە:', b.cover_url||'');
   const summary = prompt('کورتە:', b.summary||'');
-  await sb.from('books').update({title, author, cover_url:cover, summary}).eq('id',id);
+  const pdf_url = prompt('لینکی PDF:', b.pdf_url||'');
+  const author_bio = prompt('ژیاننامەی نووسەر:', b.author_bio||'');
+  await sb.from('books').update({title, author, cover_url:cover, summary, pdf_url, author_bio}).eq('id',id);
   renderBooks();
 }
 async function delRow(table,id){
