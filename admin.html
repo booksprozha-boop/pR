@@ -525,12 +525,13 @@ async function renderProfile(){
         <div class="item">
           <div><div class="t">${esc(a.name||'(بێ ناو)')}${a.id===ownerId?' 👑':''}</div><div class="s">${esc(a.id)}</div></div>
           <div class="acts">
-            ${isOwner && a.id!==ME.id?`<button class="btn sm danger" onclick="removeAdmin('${a.id}')">لابردنی دەسەڵات</button>`:''}
+            ${isOwner && a.id!==ME.id?`<button class="btn sm" onclick="editAdmin('${a.id}')">دەستکاری</button><button class="btn sm danger" onclick="removeAdmin('${a.id}')">لابردنی دەسەڵات</button>`:''}
             ${a.id===ME.id?'<span style="font-size:11px;color:#8a8">تۆیت</span>':''}
           </div>
         </div>
       `).join('') || '<div class="empty">هیچ ئادمینێک نیە</div>'}
     </div>
+    <div id="admin_err"></div>
   `;
   document.getElementById('pr_photo_file').onchange = (e)=>{ const f=e.target.files[0]; if(f) uploadImage('avatars', f, 'pr_photo', 'pr_upload_msg', 'pr_photo_prev'); };
   const naFile = document.getElementById('na_photo_file');
@@ -549,7 +550,18 @@ async function addAdmin(){
 }
 async function removeAdmin(id){
   if(!confirm('دڵنیایت لە لابردنی دەسەڵاتی ئادمینی؟')) return;
-  await sb.from('admin_profiles').delete().eq('id', id);
+  const { error } = await sb.from('admin_profiles').delete().eq('id', id);
+  const errEl = document.getElementById('admin_err');
+  if(error){ if(errEl) errEl.innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
+  renderProfile();
+}
+async function editAdmin(id){
+  const { data: a } = await sb.from('admin_profiles').select('*').eq('id',id).single();
+  const name = prompt('ناوی ئادمین:', a.name||''); if(name===null) return;
+  const photo_url = prompt('لینکی وێنە (بەتاڵی بهێڵەوە بۆ لابردن):', a.photo_url||'');
+  const { error } = await sb.from('admin_profiles').update({ name, photo_url: photo_url||null }).eq('id', id);
+  const errEl = document.getElementById('admin_err');
+  if(error){ if(errEl) errEl.innerHTML = '<div class="msg err">هەڵە: '+esc(error.message)+'</div>'; return; }
   renderProfile();
 }
 async function saveProfile(){
