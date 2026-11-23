@@ -482,7 +482,7 @@ function showFavToast(added){ showToast(added ? '♥ زیادکرا بۆ دڵخ�
 
 function shareUrl(kind, id){
   if (kind === 'book' || kind === 'post'){
-    return 'https://viynxaoruqktjgakgygv.supabase.co/functions/v1/share?type=' + kind + '&id=' + encodeURIComponent(id);
+    return 'https://black-scene-ca27.booksprozha.workers.dev/?type=' + kind + '&id=' + encodeURIComponent(id);
   }
   return location.origin + location.pathname + '#/' + kind + '/' + id;
 }
