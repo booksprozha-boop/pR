@@ -282,7 +282,8 @@ async function renderBooks(){
       <div id="b_upload_msg"></div>
       <label>کورتەی کتێب</label><textarea id="b_summary"></textarea>
       <label>فایلی PDF (ئۆپشناڵ)</label>
-      <input id="b_pdf" placeholder="https://... (یان فایل ئەپلۆد بکە)">
+      <input id="b_pdf" placeholder="لینکی گووگڵ درایڤ یان https://... (یان فایل ئەپلۆد بکە)">
+      <div style="font-size:11px;margin-top:4px;color:var(--txt2)">دەتوانیت لینکی Share ـی گووگڵ درایڤ ڕاستەوخۆ بلکێنیت — خۆی دادەگیرێت.</div>
       <input id="b_pdf_file" type="file" accept="application/pdf" style="margin-top:6px">
       <div id="b_pdf_msg"></div>
       <label>ژیاننامەی نووسەر (ئۆپشناڵ)</label><textarea id="b_bio" placeholder="چەند دێڕێک دەربارەی نووسەرەکە..."></textarea>
@@ -346,7 +347,7 @@ async function editBook(id){
   const author = prompt('نووسەر:', b.author||'');
   const cover = prompt('لینکی وێنە:', b.cover_url||'');
   const summary = prompt('کورتە:', b.summary||'');
-  const pdf_url = prompt('لینکی PDF:', b.pdf_url||'');
+  const pdf_url = prompt('لینکی PDF (یان لینکی Share ـی گووگڵ درایڤ):', b.pdf_url||'');
   const author_bio = prompt('ژیاننامەی نووسەر:', b.author_bio||'');
   await sb.from('books').update({title, author, cover_url:cover, summary, pdf_url, author_bio}).eq('id',id);
   renderBooks();
