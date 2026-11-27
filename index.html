@@ -584,12 +584,14 @@ function openPost(id){
     <h3>${esc(p.title)}</h3>
     <p class="msub">${meta}</p>
     ${p.admin_profiles?`<p class="added-by">زیادکراوە لەلایەن ${esc(p.admin_profiles.name)}</p>`:''}
-    ${(p.type==='audiobook'&&p.audio_url)?`<audio controls preload="none" style="width:100%;margin:10px 0" src="${esc(audioSrc(p.audio_url))}"></audio>`:''}
+    ${(p.type==='audiobook'&&p.audio_url)?`<button class="btn-pdf read" id="maudio" style="margin:10px 0">🎧 گوێگرتن</button>`:''}
     <p class="mbody">${esc(p.body||'')}</p>
     ${(p.images&&p.images.length)?`<div class="gallery">${p.images.map(u=>`<a href="${esc(u)}" target="_blank"><img src="${esc(u)}"></a>`).join('')}</div>`:''}`;
   document.getElementById('overlay').classList.add('open');
   document.getElementById('mclose').onclick = closeModal;
   document.getElementById('mshare').onclick = () => shareItem('post', p.id, p.title);
+  const maudio = document.getElementById('maudio');
+  if (maudio) maudio.onclick = () => window.open(audiobookUrl(p.audio_url), '_blank');
 }
 function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
 document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
@@ -598,9 +600,12 @@ let postSearchQ = { article:'', seminar:'', activity:'', news:'', selfdev:'', co
 function typeIcon(type){
   return type==='activity'?'📷':type==='news'?'📰':type==='selfdev'?'🌱':type==='course'?'🎓':type==='audiobook'?'🎧':type==='seminar'?'🎤':'✍️';
 }
-function audioSrc(url){
+function audiobookUrl(url){
+  // Audiobook links can be a Drive file, or a plain link shared from
+  // WhatsApp/Telegram/YouTube etc. — for Drive we jump to Google's own
+  // viewer/player; everything else we open exactly as given.
   const id = driveFileId(url);
-  return id ? `https://drive.google.com/uc?export=download&id=${id}` : (url||'');
+  return id ? `https://drive.google.com/file/d/${id}/preview` : (url||'');
 }
 function postCard(p, type){
   const cover = p.cover_url || (p.images && p.images[0]);
@@ -616,8 +621,8 @@ function postCard(p, type){
     ? `${p.location?`<span class="meta-date">📍 ${esc(p.location)}</span>`:''}`
     : `<span class="meta-date">${fmtDate(p.created_at)}</span>`;
   const audioRow = (type==='audiobook' && p.audio_url)
-    ? `<div class="card-pdf-row" data-audiowrap="${p.id}">
-        <button class="pdf-mini read" data-audioplay="${p.id}" data-audiosrc="${esc(audioSrc(p.audio_url))}">🎧 گوێگرتن</button>
+    ? `<div class="card-pdf-row">
+        <button class="pdf-mini read" data-audiolink="${esc(audiobookUrl(p.audio_url))}">🎧 گوێگرتن</button>
       </div>`
     : '';
   return `<div class="card" data-post="${p.id}">
@@ -641,17 +646,16 @@ function postsListHTML(type, emptyText){
 }
 function bindPostRows(){
   document.querySelectorAll('[data-post]').forEach(r => r.onclick = (e) => {
-    if(e.target.closest('[data-share-post]') || e.target.closest('[data-audioplay]') || e.target.closest('[data-audiowrap]')) return;
+    if(e.target.closest('[data-share-post]') || e.target.closest('[data-audiolink]')) return;
     openPost(r.dataset.post);
   });
   document.querySelectorAll('[data-share-post]').forEach(it => it.addEventListener('click', e => {
     e.stopPropagation();
     shareItem('post', it.dataset.sharePost, it.dataset.title, e);
   }));
-  document.querySelectorAll('[data-audioplay]').forEach(btn => btn.addEventListener('click', e => {
+  document.querySelectorAll('[data-audiolink]').forEach(btn => btn.addEventListener('click', e => {
     e.stopPropagation();
-    const wrap = btn.closest('[data-audiowrap]');
-    if (wrap) wrap.innerHTML = `<audio controls autoplay style="width:100%" src="${btn.dataset.audiosrc}"></audio>`;
+    window.open(btn.dataset.audiolink, '_blank');
   }));
 }
 function renderPostsList(type, title, emptyText){
