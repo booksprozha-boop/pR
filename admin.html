@@ -131,6 +131,9 @@ select option{background:#1c1f2a;color:#fff}
     <div class="tab" data-tab="article">وتار</div>
     <div class="tab" data-tab="seminar">سیمینار</div>
     <div class="tab" data-tab="activity">چالاکی</div>
+    <div class="tab" data-tab="news">هەواڵ</div>
+    <div class="tab" data-tab="selfdev">گەشەپێدان</div>
+    <div class="tab" data-tab="course">خول</div>
     <div class="tab" data-tab="profile">پڕۆفایلم</div>
     <div class="tab" data-tab="settings">ڕێکخستنەکان</div>
     <div class="tab" data-tab="ticker">ئاگادارکردنەوە</div>
@@ -254,7 +257,7 @@ async function renderTab(){
   const panel = document.getElementById('panel');
   panel.innerHTML = '<div class="empty">چاوەڕێبە...</div>';
   if(activeTab==='books') return renderBooks();
-  if(['article','seminar','activity'].includes(activeTab)) return renderPosts(activeTab);
+  if(['article','seminar','activity','news','selfdev','course'].includes(activeTab)) return renderPosts(activeTab);
   if(activeTab==='profile') return renderProfile();
   if(activeTab==='settings') return renderSettings();
   if(activeTab==='ticker') return renderTicker();
@@ -287,6 +290,8 @@ async function renderBooks(){
       <input id="b_pdf_file" type="file" accept="application/pdf" style="margin-top:6px">
       <div id="b_pdf_msg"></div>
       <label>ژیاننامەی نووسەر (ئۆپشناڵ)</label><textarea id="b_bio" placeholder="چەند دێڕێک دەربارەی نووسەرەکە..."></textarea>
+      <label>فایلی دەنگی (ئۆپشناڵ — بۆ بەشی کتێبی دەنگی)</label>
+      <input id="b_audio" placeholder="لینکی گووگڵ درایڤ یان https://...">
       <button class="btn primary" style="margin-top:12px" onclick="addBook()">زیادکردن</button>
       <div id="b_msg"></div>
     </div>
@@ -335,6 +340,7 @@ async function addBook(){
     summary: document.getElementById('b_summary').value.trim()||null,
     pdf_url: document.getElementById('b_pdf').value.trim()||null,
     author_bio: document.getElementById('b_bio').value.trim()||null,
+    audio_url: document.getElementById('b_audio').value.trim()||null,
     admin_id: ME.id
   };
   const { error } = await sb.from('books').insert(payload);
@@ -349,7 +355,8 @@ async function editBook(id){
   const summary = prompt('کورتە:', b.summary||'');
   const pdf_url = prompt('لینکی PDF (یان لینکی Share ـی گووگڵ درایڤ):', b.pdf_url||'');
   const author_bio = prompt('ژیاننامەی نووسەر:', b.author_bio||'');
-  await sb.from('books').update({title, author, cover_url:cover, summary, pdf_url, author_bio}).eq('id',id);
+  const audio_url = prompt('لینکی کتێبی دەنگی (ئۆپشناڵ):', b.audio_url||'');
+  await sb.from('books').update({title, author, cover_url:cover, summary, pdf_url, author_bio, audio_url}).eq('id',id);
   renderBooks();
 }
 async function delRow(table,id){
@@ -359,7 +366,7 @@ async function delRow(table,id){
 }
 
 /* ---------- POSTS (article/seminar/activity) ---------- */
-const typeLabel = {article:'وتار', seminar:'سیمینار', activity:'چالاکی'};
+const typeLabel = {article:'وتار', seminar:'سیمینار', activity:'چالاکی', news:'هەواڵ', selfdev:'بابەتی گەشەپێدان', course:'خول'};
 let NEW_POST_GALLERY = [];
 async function renderPosts(type){
   const { data: posts } = await sb.from('posts').select('*').eq('type',type).order('created_at',{ascending:false});
