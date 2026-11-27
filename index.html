@@ -23,7 +23,7 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 :root{
-  --bg1:#0d0f0e; --bg2:#000000;
+  --bg1:#05070a; --bg2:#2a3142;
   --glass:rgba(255,255,255,.13); --glass-2:rgba(255,255,255,.2);
   --gborder:rgba(255,255,255,.26); --gborder-2:rgba(255,255,255,.38);
   --txt:#fff; --txt2:rgba(255,255,255,.65); --txt3:rgba(255,255,255,.45);
@@ -31,7 +31,7 @@
   --acc1:rgba(24,119,242,.28); --acc2:rgba(13,93,201,.24);
 }
 html[data-theme="light"]{
-  --bg1:#f7f8fa; --bg2:#eceef2;
+  --bg1:#dfe4ec; --bg2:#fbfcfe;
   --glass:rgba(255,255,255,.66); --glass-2:rgba(255,255,255,.93);
   --gborder:rgba(100,106,122,.16); --gborder-2:rgba(100,106,122,.28);
   --txt:#20232b; --txt2:rgba(32,35,43,.62); --txt3:rgba(32,35,43,.42);
@@ -96,6 +96,7 @@ html[data-theme="light"] .ticker-wrap{color:#7a4a08;background:linear-gradient(1
 .stat b{position:relative;display:block;font-size:19px;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
 .stat span{position:relative;font-size:10.5px;color:var(--txt2)}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.cat-filter .sort-sel{width:100%;max-width:260px}
 .chip{position:relative;overflow:hidden;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);background:linear-gradient(160deg,var(--glass-2),var(--glass));border:1px solid var(--gborder);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.55),inset 0 -8px 12px -8px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.08);color:var(--txt2);font-size:12px;font-weight:600;padding:9px 18px;border-radius:13px;cursor:pointer;white-space:nowrap;transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease,color .15s}
 .chip::before{content:'';position:absolute;top:0;left:10%;right:10%;height:45%;border-radius:50px;background:linear-gradient(180deg,rgba(255,255,255,.55),transparent);opacity:.8;pointer-events:none}
 .chip::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.35),transparent 55%);opacity:.5;pointer-events:none}
@@ -232,6 +233,12 @@ footer.site .social-row{margin-top:0}
       <a href="#/posts" data-r="/posts">وتار</a>
       <a href="#/seminars" data-r="/seminars">سیمینار</a>
       <a href="#/activities" data-r="/activities">چالاکی</a>
+      <a href="#/news" data-r="/news">هەواڵەکان</a>
+      <a href="#/authors" data-r="/authors">نووسەرەکان</a>
+      <a href="#/buy" data-r="/buy">کڕینی کتێب</a>
+      <a href="#/audiobooks" data-r="/audiobooks">کتێبی دەنگی</a>
+      <a href="#/selfdev" data-r="/selfdev">گەشەپێدان</a>
+      <a href="#/courses" data-r="/courses">خولەکان</a>
       <a href="#/about" data-r="/about">دەربارە</a>
     </div>
     <span class="theme-btn" id="themeBtn" title="گۆڕینی دارک مۆد">🌙</span>
@@ -424,11 +431,10 @@ function filteredBooks(){
 function renderHome(){
   const el = document.getElementById('app');
   const list = filteredBooks();
-  const chips = `<div class="chips">
-    <span class="chip ${!activeCat?'active':''}" data-cat="">هەموو</span>
-    ${DATA.cats.map(c=>`<span class="chip ${String(activeCat)===String(c.id)?'active':''}" data-cat="${c.id}">${esc(c.name)}</span>`).join('')}
-    <span class="chip ${activeCat==='__fav__'?'active':''}" data-cat="__fav__">♥ دڵخوازەکان</span>
-  </div>`;
+  const catOpts = `<option value="" ${!activeCat?'selected':''}>هەموو پۆلەکان</option>` +
+    DATA.cats.map(c=>`<option value="${c.id}" ${String(activeCat)===String(c.id)?'selected':''}>${esc(c.name)}</option>`).join('') +
+    `<option value="__fav__" ${activeCat==='__fav__'?'selected':''}>♥ دڵخوازەکان</option>`;
+  const chips = `<div class="cat-filter"><select id="catSel" class="sort-sel">${catOpts}</select></div>`;
   const sortOpts = [
     ['new','نوێترین'], ['views','زۆرترین بینراو'], ['reads','زۆرترین خوێندراوە'], ['downloads','زۆرترین داگیراو']
   ].map(([v,l])=>`<option value="${v}" ${activeSort===v?'selected':''}>${l}</option>`).join('');
@@ -442,9 +448,8 @@ function renderHome(){
 }
 
 function bindHome(){
-  document.querySelectorAll('.chip[data-cat]').forEach(c => c.onclick = () => {
-    activeCat = c.dataset.cat || null; renderHome();
-  });
+  const catSel = document.getElementById('catSel');
+  if (catSel) catSel.addEventListener('change', () => { activeCat = catSel.value || null; renderHome(); });
   const sortSel = document.getElementById('sortSel');
   if (sortSel) sortSel.addEventListener('change', () => { activeSort = sortSel.value; renderHome(); });
   const s = document.getElementById('search');
@@ -588,7 +593,7 @@ function openPost(id){
 function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
 document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
 
-let postSearchQ = { article:'', seminar:'', activity:'' };
+let postSearchQ = { article:'', seminar:'', activity:'', news:'', selfdev:'', course:'' };
 function postsListHTML(type, emptyText){
   const q = (postSearchQ[type]||'').trim().toLowerCase();
   let list = DATA.posts.filter(p => p.type === type);
@@ -610,7 +615,7 @@ function postsListHTML(type, emptyText){
       </div>`;
     } else {
       html += `<div class="row-card" data-post="${p.id}">
-        <div class="icon-box">${p.cover_url?`<img src="${esc(p.cover_url)}">`:(type==='activity'?'📷':'✍️')}</div>
+        <div class="icon-box">${p.cover_url?`<img src="${esc(p.cover_url)}">`:(type==='activity'?'📷':type==='news'?'📰':type==='selfdev'?'🌱':type==='course'?'🎓':'✍️')}</div>
         <div style="flex:1"><p class="row-title">${esc(p.title)}</p>
         <p class="row-meta">${when} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi></p>${who}</div>
         <span class="share-btn row-share" data-share-post="${p.id}" data-title="${esc(p.title)}">${SHARE_SVG}</span>
@@ -637,6 +642,86 @@ function renderPostsList(type, title, emptyText){
     bindPostRows();
   });
   bindPostRows();
+}
+
+function renderAuthors(){
+  const el = document.getElementById('app');
+  const map = new Map();
+  DATA.books.forEach(b => {
+    const name = (b.author||'').trim();
+    if (!name) return;
+    if (!map.has(name)) map.set(name, { name, bio:'', books:[] });
+    const a = map.get(name);
+    if (b.author_bio && !a.bio) a.bio = b.author_bio;
+    a.books.push(b);
+  });
+  const authors = Array.from(map.values()).sort((x,y)=>y.books.length-x.books.length);
+  const q = (authorSearchQ||'').trim().toLowerCase();
+  const list = q ? authors.filter(a=>a.name.toLowerCase().includes(q)) : authors;
+  el.innerHTML = `<h2 class="section">نووسەرەکان</h2>` +
+    `<div class="search"><span class="search-ic">🔍</span><input id="authorSearch" placeholder="گەڕان بۆ نووسەر..." value="${esc(authorSearchQ||'')}"></div>` +
+    `<div class="admins" id="authorList">${authorsHTML(list)}</div>`;
+  const s = document.getElementById('authorSearch');
+  if (s) s.addEventListener('input', () => {
+    authorSearchQ = s.value;
+    const qq = authorSearchQ.trim().toLowerCase();
+    const l2 = qq ? authors.filter(a=>a.name.toLowerCase().includes(qq)) : authors;
+    document.getElementById('authorList').innerHTML = authorsHTML(l2);
+    bindAuthorCards();
+  });
+  bindAuthorCards();
+}
+function authorsHTML(list){
+  if (!list.length) return '<div class="empty">هیچ نووسەرێک نیە</div>';
+  return list.map(a => `
+    <div class="admin-card" data-author="${esc(a.name)}" style="cursor:pointer">
+      <div class="avatar">${esc((a.name||'?').slice(0,1))}</div>
+      <p class="name">${esc(a.name)}</p>
+      <p class="role">${esc(a.bio ? (a.bio.length>80?a.bio.slice(0,80)+'…':a.bio) : (a.books.length+' کتێب'))}</p>
+    </div>`).join('');
+}
+function bindAuthorCards(){
+  document.querySelectorAll('[data-author]').forEach(c => c.onclick = () => {
+    activeCat = null;
+    const name = c.dataset.author;
+    const el = document.getElementById('app');
+    const books = DATA.books.filter(b => (b.author||'').trim() === name);
+    const bio = (books.find(b=>b.author_bio)||{}).author_bio || '';
+    el.innerHTML = `<div class="about-card">
+        <h3>${esc(name)}</h3>
+        ${bio?`<p>${esc(bio)}</p>`:''}
+      </div>
+      <div class="section-head"><span class="section-dot"></span><p>کتێبەکانی ئەم نووسەرە</p></div>
+      <div class="grid">${books.map(bookCard).join('')}</div>`;
+    bindCards();
+  });
+}
+let authorSearchQ = '';
+
+function renderBuyPlaceholder(){
+  const el = document.getElementById('app');
+  el.innerHTML = `<div class="about-card">
+    <h3>کڕینی کتێب</h3>
+    <p>ئەم بەشە بەم زووانە چالاک دەبێت. چاوەڕێی نوێکردنەوەکانمان بن.</p>
+  </div>`;
+}
+
+function renderAudiobooks(){
+  const el = document.getElementById('app');
+  const list = DATA.books.filter(b => b.audio_url);
+  el.innerHTML = `<h2 class="section">کتێبی دەنگی</h2>` +
+    `<div class="list">${list.length ? list.map(audiobookRow).join('') : '<div class="empty">هیچ کتێبێکی دەنگی نیە</div>'}</div>`;
+}
+function audiobookRow(b){
+  const id = driveFileId(b.audio_url);
+  const src = id ? `https://drive.google.com/uc?export=download&id=${id}` : b.audio_url;
+  return `<div class="row-card" style="flex-direction:column;align-items:stretch;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="icon-box">${b.cover_url?`<img src="${esc(b.cover_url)}">`:'🎧'}</div>
+      <div style="flex:1"><p class="row-title">${esc(b.title)}</p><p class="row-meta">${esc(b.author||'')}</p></div>
+    </div>
+    <audio controls preload="none" style="width:100%" src="${esc(src)}"></audio>
+  </div>`;
 }
 
 function renderAbout(){
@@ -679,6 +764,12 @@ function render(){
   if (r === '/posts') renderPostsList('article','وتارەکان','هیچ وتارێک نیە');
   else if (r === '/seminars') renderPostsList('seminar','سیمینارەکان','هیچ سیمینارێک نیە');
   else if (r === '/activities') renderPostsList('activity','چالاکییەکانی پڕۆژە','هیچ چالاکییەک نیە');
+  else if (r === '/news') renderPostsList('news','هەواڵەکان','هیچ هەواڵێک نیە');
+  else if (r === '/authors') renderAuthors();
+  else if (r === '/buy') renderBuyPlaceholder();
+  else if (r === '/audiobooks') renderAudiobooks();
+  else if (r === '/selfdev') renderPostsList('selfdev','گەشەپێدان','هیچ بابەتێک نیە');
+  else if (r === '/courses') renderPostsList('course','خولەکان','هیچ خولێک نیە');
   else if (r === '/about') renderAbout();
   else if (r.indexOf('/book/') === 0) { renderHome(); openBook(r.slice(6)); }
   else if (r.indexOf('/post/') === 0) { renderHome(); openPost(r.slice(6)); }
