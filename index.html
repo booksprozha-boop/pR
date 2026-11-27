@@ -230,15 +230,15 @@ footer.site .social-row{margin-top:0}
     <div class="logo"><span class="mark">📖</span><span class="logo-text">کتێبخانە</span></div>
     <div class="nav" id="nav">
       <a href="#/" data-r="/">سەرەکی</a>
+      <a href="#/news" data-r="/news">هەواڵەکان</a>
       <a href="#/posts" data-r="/posts">وتار</a>
       <a href="#/seminars" data-r="/seminars">سیمینار</a>
-      <a href="#/activities" data-r="/activities">چالاکی</a>
-      <a href="#/news" data-r="/news">هەواڵەکان</a>
-      <a href="#/authors" data-r="/authors">نووسەرەکان</a>
-      <a href="#/buy" data-r="/buy">کڕینی کتێب</a>
-      <a href="#/audiobooks" data-r="/audiobooks">کتێبی دەنگی</a>
       <a href="#/selfdev" data-r="/selfdev">گەشەپێدان</a>
       <a href="#/courses" data-r="/courses">خولەکان</a>
+      <a href="#/audiobooks" data-r="/audiobooks">کتێبی دەنگی</a>
+      <a href="#/activities" data-r="/activities">چالاکی</a>
+      <a href="#/authors" data-r="/authors">نووسەرەکان</a>
+      <a href="#/buy" data-r="/buy">کڕینی کتێب</a>
       <a href="#/about" data-r="/about">دەربارە</a>
     </div>
     <span class="theme-btn" id="themeBtn" title="گۆڕینی دارک مۆد">🌙</span>
@@ -584,6 +584,7 @@ function openPost(id){
     <h3>${esc(p.title)}</h3>
     <p class="msub">${meta}</p>
     ${p.admin_profiles?`<p class="added-by">زیادکراوە لەلایەن ${esc(p.admin_profiles.name)}</p>`:''}
+    ${(p.type==='audiobook'&&p.audio_url)?`<audio controls preload="none" style="width:100%;margin:10px 0" src="${esc(audioSrc(p.audio_url))}"></audio>`:''}
     <p class="mbody">${esc(p.body||'')}</p>
     ${(p.images&&p.images.length)?`<div class="gallery">${p.images.map(u=>`<a href="${esc(u)}" target="_blank"><img src="${esc(u)}"></a>`).join('')}</div>`:''}`;
   document.getElementById('overlay').classList.add('open');
@@ -593,48 +594,71 @@ function openPost(id){
 function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
 document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
 
-let postSearchQ = { article:'', seminar:'', activity:'', news:'', selfdev:'', course:'' };
+let postSearchQ = { article:'', seminar:'', activity:'', news:'', selfdev:'', course:'', audiobook:'' };
+function typeIcon(type){
+  return type==='activity'?'📷':type==='news'?'📰':type==='selfdev'?'🌱':type==='course'?'🎓':type==='audiobook'?'🎧':type==='seminar'?'🎤':'✍️';
+}
+function audioSrc(url){
+  const id = driveFileId(url);
+  return id ? `https://drive.google.com/uc?export=download&id=${id}` : (url||'');
+}
+function postCard(p, type){
+  const cover = p.cover_url || (p.images && p.images[0]);
+  let badge = '';
+  if (type === 'seminar'){
+    const d = p.event_date ? new Date(p.event_date) : null;
+    const isPast = d && d < new Date(new Date().toDateString());
+    badge = `<span class="badge">${d ? (isPast?'تەواوبوو':d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})) : ''}</span>`;
+  } else if (p.images && p.images.length){
+    badge = `<span class="badge">+${p.images.length} 🖼</span>`;
+  }
+  const metaExtra = type==='seminar'
+    ? `${p.location?`<span class="meta-date">📍 ${esc(p.location)}</span>`:''}`
+    : `<span class="meta-date">${fmtDate(p.created_at)}</span>`;
+  const audioRow = (type==='audiobook' && p.audio_url)
+    ? `<div class="card-pdf-row" data-audiowrap="${p.id}">
+        <button class="pdf-mini read" data-audioplay="${p.id}" data-audiosrc="${esc(audioSrc(p.audio_url))}">🎧 گوێگرتن</button>
+      </div>`
+    : '';
+  return `<div class="card" data-post="${p.id}">
+    <div class="cover">
+      ${cover ? `<img src="${esc(cover)}">` : typeIcon(type)}
+      ${badge}
+      <span class="share-btn" data-share-post="${p.id}" data-title="${esc(p.title)}">${SHARE_SVG}</span>
+    </div>
+    <p class="title">${esc(p.title)}</p>
+    <div class="meta-row"><span>${EYE_SVG} <bdi>${p.views||0}</bdi></span>${metaExtra}</div>
+    ${p.admin_profiles?`<p class="added-by">زیادکراوە لەلایەن ${esc(p.admin_profiles.name)}</p>`:''}
+    ${audioRow}
+  </div>`;
+}
 function postsListHTML(type, emptyText){
   const q = (postSearchQ[type]||'').trim().toLowerCase();
   let list = DATA.posts.filter(p => p.type === type);
   if (q) list = list.filter(p => (p.title||'').toLowerCase().includes(q) || (p.body||'').toLowerCase().includes(q));
   if (!list.length) return `<div class="empty">${q?'هیچ نەدۆزرایەوە':emptyText}</div>`;
-  let html = '';
-  list.forEach(p => {
-    const when = `<bdi>${new Date(p.created_at).toLocaleDateString('en-GB')}</bdi>`;
-    const who = p.admin_profiles ? `<p class="added-by">زیادکراوە لەلایەن ${esc(p.admin_profiles.name)}</p>` : '';
-    if (type === 'seminar') {
-      const d = p.event_date ? new Date(p.event_date) : null;
-      const day = d ? d.getDate() : '--';
-      const isPast = d && d < new Date(new Date().toDateString());
-      html += `<div class="row-card ${isPast?'done':''}" data-post="${p.id}">
-        <div class="date-box"><b><bdi>${day}</bdi></b><span>${d? d.toLocaleDateString('en-GB',{month:'short'}) : ''}</span></div>
-        <div style="flex:1"><p class="row-title">${esc(p.title)}</p>
-        <p class="row-meta">${isPast ? 'تەواوبوو' : `🕐 <bdi>${esc(p.event_time||'')}</bdi> &middot; 📍 ${esc(p.location||'')}`} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi></p>${who}</div>
-        <span class="share-btn row-share" data-share-post="${p.id}" data-title="${esc(p.title)}">${SHARE_SVG}</span>
-      </div>`;
-    } else {
-      html += `<div class="row-card" data-post="${p.id}">
-        <div class="icon-box">${p.cover_url?`<img src="${esc(p.cover_url)}">`:(type==='activity'?'📷':type==='news'?'📰':type==='selfdev'?'🌱':type==='course'?'🎓':'✍️')}</div>
-        <div style="flex:1"><p class="row-title">${esc(p.title)}</p>
-        <p class="row-meta">${when} &middot; ${EYE_SVG} <bdi>${p.views||0}</bdi></p>${who}</div>
-        <span class="share-btn row-share" data-share-post="${p.id}" data-title="${esc(p.title)}">${SHARE_SVG}</span>
-      </div>`;
-    }
-  });
-  return html;
+  return list.map(p => postCard(p, type)).join('');
 }
 function bindPostRows(){
-  document.querySelectorAll('[data-post]').forEach(r => r.onclick = (e) => { if(e.target.closest('[data-share-post]')) return; openPost(r.dataset.post); });
+  document.querySelectorAll('[data-post]').forEach(r => r.onclick = (e) => {
+    if(e.target.closest('[data-share-post]') || e.target.closest('[data-audioplay]') || e.target.closest('[data-audiowrap]')) return;
+    openPost(r.dataset.post);
+  });
   document.querySelectorAll('[data-share-post]').forEach(it => it.addEventListener('click', e => {
+    e.stopPropagation();
     shareItem('post', it.dataset.sharePost, it.dataset.title, e);
+  }));
+  document.querySelectorAll('[data-audioplay]').forEach(btn => btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const wrap = btn.closest('[data-audiowrap]');
+    if (wrap) wrap.innerHTML = `<audio controls autoplay style="width:100%" src="${btn.dataset.audiosrc}"></audio>`;
   }));
 }
 function renderPostsList(type, title, emptyText){
   const el = document.getElementById('app');
   el.innerHTML = `<h2 class="section">${title}</h2>` +
     `<div class="search"><span class="search-ic">🔍</span><input id="postSearch" placeholder="گەڕان..." value="${esc(postSearchQ[type]||'')}"></div>` +
-    `<div class="list" id="postList">${postsListHTML(type, emptyText)}</div>`;
+    `<div class="grid" id="postList">${postsListHTML(type, emptyText)}</div>`;
   const sInp = document.getElementById('postSearch');
   if (sInp) sInp.addEventListener('input', () => {
     postSearchQ[type] = sInp.value;
@@ -706,24 +730,6 @@ function renderBuyPlaceholder(){
   </div>`;
 }
 
-function renderAudiobooks(){
-  const el = document.getElementById('app');
-  const list = DATA.books.filter(b => b.audio_url);
-  el.innerHTML = `<h2 class="section">کتێبی دەنگی</h2>` +
-    `<div class="list">${list.length ? list.map(audiobookRow).join('') : '<div class="empty">هیچ کتێبێکی دەنگی نیە</div>'}</div>`;
-}
-function audiobookRow(b){
-  const id = driveFileId(b.audio_url);
-  const src = id ? `https://drive.google.com/uc?export=download&id=${id}` : b.audio_url;
-  return `<div class="row-card" style="flex-direction:column;align-items:stretch;gap:8px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <div class="icon-box">${b.cover_url?`<img src="${esc(b.cover_url)}">`:'🎧'}</div>
-      <div style="flex:1"><p class="row-title">${esc(b.title)}</p><p class="row-meta">${esc(b.author||'')}</p></div>
-    </div>
-    <audio controls preload="none" style="width:100%" src="${esc(src)}"></audio>
-  </div>`;
-}
-
 function renderAbout(){
   const el = document.getElementById('app');
   const s = DATA.settings || {};
@@ -767,7 +773,7 @@ function render(){
   else if (r === '/news') renderPostsList('news','هەواڵەکان','هیچ هەواڵێک نیە');
   else if (r === '/authors') renderAuthors();
   else if (r === '/buy') renderBuyPlaceholder();
-  else if (r === '/audiobooks') renderAudiobooks();
+  else if (r === '/audiobooks') renderPostsList('audiobook','کتێبی دەنگی','هیچ کتێبێکی دەنگی نیە');
   else if (r === '/selfdev') renderPostsList('selfdev','گەشەپێدان','هیچ بابەتێک نیە');
   else if (r === '/courses') renderPostsList('course','خولەکان','هیچ خولێک نیە');
   else if (r === '/about') renderAbout();
