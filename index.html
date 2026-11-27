@@ -369,15 +369,42 @@ function bookCard(b){
     </div>`:''}
   </div>`;
 }
+// Recognizes a Google Drive share link in any of its common forms and pulls out the file id,
+// so a PDF added by pasting a normal "Share" link from Drive still reads/downloads correctly.
+function driveFileId(url){
+  const m = String(url||'').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?[^#]*[?&]id=)([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
 function pdfRead(b){
   sb.rpc('bump_book_reads', { p_id: b.id }).then(()=>{});
-  window.open(b.pdf_url, '_blank');
+  const id = driveFileId(b.pdf_url);
+  // Drive's own viewer embeds/opens far more reliably than the raw share link
+  window.open(id ? `https://drive.google.com/file/d/${id}/preview` : b.pdf_url, '_blank');
 }
-function pdfDownload(b){
+async function pdfDownload(b){
   sb.rpc('bump_book_downloads', { p_id: b.id }).then(()=>{});
-  const a = document.createElement('a');
-  a.href = b.pdf_url; a.download = ''; a.target = '_blank';
-  document.body.appendChild(a); a.click(); a.remove();
+  const id = driveFileId(b.pdf_url);
+  if (id){
+    // Google's own direct-download endpoint sends a real "attachment" header,
+    // so a plain navigation saves the file instead of opening Drive's viewer page.
+    location.href = `https://drive.google.com/uc?export=download&id=${id}`;
+    return;
+  }
+  // For a direct file link (e.g. Supabase Storage), the browser often just opens the PDF
+  // inline instead of saving it. Fetching it as a blob forces a real save-to-device download.
+  try {
+    const res = await fetch(b.pdf_url);
+    if (!res.ok) throw new Error('fetch failed');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = (b.title || 'book') + '.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+  } catch (e) {
+    // CORS or network issue: fall back to opening it so the visitor can save it manually
+    window.open(b.pdf_url, '_blank');
+  }
 }
 
 const SORTERS = {
